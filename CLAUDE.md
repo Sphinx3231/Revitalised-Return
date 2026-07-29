@@ -46,6 +46,182 @@ This project is independent — it has no relation to any other project in sibli
 
 Each of these 14 steps is executed through the **Director/subagent workflow** in Section 6, not implemented directly.
 
+## 🔧 STEP DETAIL SPECIFICATIONS (Steps 2–7)
+
+### STEP 2: Core Game State Machine & Global Event Bus
+
+**2.1 Global Signal Dispatcher (`res://autoload/EventBus.gd`)**
+Pub/sub messenger that decouples systems (e.g. UI updates on damage without referencing the Player or Enemy nodes directly).
+
+*Player & Vital Signals:*
+```gdscript
+signal player_health_changed(current: float, max_health: float)
+signal player_stamina_changed(current: float, max_stamina: float)
+signal player_posture_changed(current: float, max_posture: float)
+signal stance_swapped(new_stance_resource: StanceData)
+signal player_died()
+```
+*Combat & Damage Signals:*
+```gdscript
+signal entity_damaged(target_node: Node3D, amount: float, is_critical: bool)
+signal posture_broken(target_node: Node3D)
+signal parry_executed(attacker: Node3D, defender: Node3D)
+signal enemy_killed(enemy_node: Node3D, exp_reward: int)
+```
+*World & UI Signals:*
+```gdscript
+signal quest_state_updated(quest_id: String, state: int)
+signal interaction_triggered(interactable_node: Node3D)
+signal show_notice(text: String, duration: float)
+```
+
+**2.2 Game State Manager Singleton (`res://autoload/GameState.gd`)**
+Top-level control over global game loops, menu states, tree pausing, and cursor trapping.
+
+FSM state enum:
+```gdscript
+enum State { INITIALIZING, MAIN_MENU, PLAYING, PAUSED, DIALOGUE, CUTSCENE, GAME_OVER }
+var current_state: State = State.INITIALIZING
+```
+State transition logic (`set_state(new_state)`):
+*   Updates `current_state`.
+*   `PLAYING`: `Input.mouse_mode = Input.MOUSE_MODE_CAPTURED`, `get_tree().paused = false`.
+*   `PAUSED` / `MAIN_MENU`: `Input.mouse_mode = Input.MOUSE_MODE_VISIBLE`, `get_tree().paused = true` (UI nodes must have `process_mode = PROCESS_MODE_ALWAYS`).
+*   `DIALOGUE` / `CUTSCENE`: `Input.mouse_mode = Input.MOUSE_MODE_CAPTURED`, freezes player inputs while keeping environment/animations ticking (`get_tree().paused = false`).
+
+### STEP 3: Abstracted Input System & Rolling Action Buffer
+
+**3.1 Hardware Abstraction Layer (Input Map Setup)**
+Configure actions in `Project Settings -> Input Map` with both keyboard/mouse and gamepad bindings:
+*   `move_forward` (W / Left Stick Up), `move_back` (S / Left Stick Down)
+*   `move_left` (A / Left Stick Left), `move_right` (D / Left Stick Right)
+*   `light_attack` (LMB / Controller X)
+*   `heavy_attack` (RMB / Controller Y)
+*   `parry` (F / Controller LB)
+*   `dodge` (Space / Controller A)
+*   `stance_next` (Q / Controller RB), `stance_prev` (E / Controller LT)
+*   `interact` (E / Controller D-Pad Up)
+
+**3.2 Rolling Action Queue Buffer**
+Inputs pressed during an animation's wind-up or recovery window are queued and executed as soon as the active state permits.
+
+*   **Buffer data structure:** `Array[Dictionary]` of active input entries: `{ "action": StringName, "timestamp": float }`.
+*   **Buffer ingestion:** in `_unhandled_input(event)`, whenever `light_attack`, `heavy_attack`, `parry`, or `dodge` is pressed, append `{ "action": action_name, "timestamp": Time.get_ticks_msec() / 1000.0 }`.
+*   **Buffer clean-up & consumption:** expiration window `T_expire = 0.15s`. At the start of an animation recovery frame, check if `t_current - t_action <= 0.15`. If valid, trigger the buffered action and clear the buffer array.
+
+### STEP 4: 3D Kinematics, Movement Physics & Dodge Roll
+
+**4.1 Directional Movement & Inertia Interpolation**
+Calculates character movement relative to the active `Camera3D` transform using lerped acceleration/deceleration vectors.
+
+Camera-relative vector derivation:
+```
+D_input = (Transform_cam.basis * V_input).normalized()
+```
+Kinematic velocity equations:
+```
+V_target = D_input * S_speed
+V_horizontal = lerp(V_horizontal, V_target, alpha * delta_t)
+```
+Where `alpha_accel = 15.0` when `D_input != 0`, and `alpha_frict = 20.0` when `D_input == 0`.
+
+Gravity & air resistance:
+```
+V_y = V_y - g * delta_t   (g = 24.5 m/s^2)
+```
+
+**4.2 Dynamic Character Mesh Lean**
+Applies subtle mesh tilting during fast direction changes to convey weight:
+```
+Lean Angle (Z-axis) = -clamp(omega_yaw * 0.1, -5.0deg, 5.0deg)
+```
+
+**4.3 Dodge Roll Mechanics & Invincibility Window (i-Frames)**
+*   **Execution:** locks movement direction to `D_input` (or mesh facing direction if idle).
+*   **Speed profile:** initial burst at `1.8x S_speed`, tapering linearly to `1.0x S_speed` over `0.5s`.
+*   **i-Frame timing:** total duration `0.5s`; i-frame window `0.15s <= t <= 0.35s`. During the active window, disable `PlayerHurtbox.collision_layer` or set `is_invulnerable = true`.
+*   **Resource cost:** consumes `20.0` Stamina. Triggers a `1.2s` pause on passive stamina regeneration.
+
+### STEP 5: Stance Engine, Hitbox Registration & Parry Logic
+
+**5.1 Custom Stance Resource Architecture (`StanceData.gd`)**
+Stances are defined via custom `Resource` scripts exported into `.tres` files.
+
+Resource properties:
+*   `stance_name: String`
+*   `base_damage_multiplier: float` (e.g. `1.2x`)
+*   `posture_damage_multiplier: float` (e.g. `1.8x`)
+*   `attack_speed_scalar: float` (e.g. `0.85x`)
+*   `parry_window_duration: float` (e.g. `0.12s`)
+*   `icon: Texture2D`
+
+The 4 stances:
+*   **Stone:** Heavy posture damage, slow recovery, high poise.
+*   **Water:** Rapid fluid thrusts, low stamina cost per strike.
+*   **Flame:** Wide horizontal arc cleaves for crowd control.
+*   **Wind:** High deflection efficiency and specialized anti-spear counters.
+
+**5.2 Frame-Accurate Area3D Sweep Validation & Parry Logic**
+*   **Hitbox/hurtbox setup:** weapons carry an `Area3D` (hitbox) attached to the hand bone; entities carry an `Area3D` (hurtbox) encompassing the body mesh.
+*   **Active window monitoring:** hitbox monitoring is enabled strictly during key animation frame tracks using `AnimationPlayer` method-call tracks (`enable_hitbox()` / `disable_hitbox()`).
+*   **Collision resolution** (`area_entered` callback):
+    *   **Parry check:** if target is in `PARRY` state AND `t_parry <= parry_window_duration`: attacker gets interrupted (plays stagger animation, posture depleted by `40%`), defender triggers parry counter animation, emit `EventBus.parry_executed(attacker, defender)`.
+    *   **Block check:** if target is blocking, reduce incoming damage by block mitigation factor (`80%`), apply full posture damage to target's posture bar.
+    *   **Hit check:** deduct `Health = BaseDamage * StanceMultiplier * (1 - ArmorMitigation)`; deduct posture; emit `EventBus.entity_damaged`.
+
+### STEP 6: 3D "Juice" Engine & Impact Feedback
+
+**6.1 Freeze-Frame Hit-Stop Engine**
+On successful heavy hit or parry, momentarily freeze the game tree to give attacks weight:
+*   Execute `Engine.time_scale = 0.0` for `0.03s - 0.06s` (2-4 frames at 60 FPS).
+*   Resume `Engine.time_scale = 1.0` via a non-paused scene tree timer (`get_tree().create_timer(duration, true, false, true)`).
+
+**6.2 Camera3D Trauma Shake System**
+Non-repetitive shake based on 2D Simplex/FastNoise.
+
+Trauma decay:
+```
+Trauma(t) = clamp(Trauma(t-1) - Decay * delta_t, 0.0, 1.0)   (Decay = 1.5)
+```
+Rotational offset calculation:
+```
+Pitch = MaxPitch * Trauma^2 * Noise.get_noise_2d(seed1, t)
+Yaw   = MaxYaw   * Trauma^2 * Noise.get_noise_2d(seed2, t)
+Roll  = MaxRoll  * Trauma^2 * Noise.get_noise_2d(seed3, t)
+```
+
+**6.3 Visual Impact VFX**
+*   **Hit-flash material shader:** spatial shader with uniform `flash_intensity: float` (`0.0` to `1.0`). On damage hit, tween `flash_intensity` to `1.0` (pure white albedo) and decay to `0.0` over `0.08s`.
+*   **Directional spark particles:** instantiate `GPUParticles3D` at the contact point, oriented along the contact surface normal vector.
+*   **Weapon arc trails:** dynamic `MeshInstance3D` ribbon trail rendered along the sword tip and hilt points during active attack frames.
+
+### STEP 7: 3D AI Architecture, Perception & Behavior Trees
+
+**7.1 Multi-Sensory Perception Engine**
+Enemies evaluate player detection every `0.1s` via physics sweeps.
+
+Vision cone verification:
+*   Vector to target: `D_target = (P_player - P_enemy).normalized()`.
+*   Dot product with facing vector: `cos(theta) = F_enemy . D_target`.
+*   Angle check: if `theta <= 45deg` (90 degree total cone) and distance `d <= 18.0m`: cast `RayCast3D` from enemy eye position to player center. If `RayCast3D.get_collider() == Player`, increment detection meter by `30.0 / d * delta_t`.
+
+Acoustic detection sphere: if the player enters an enemy's sound `Area3D` (`d <= 8.0m`) while sprinting, rolling, or swinging a weapon, instantly force enemy state to `INVESTIGATE`.
+
+**7.2 Enemy Finite State Machine (FSM) Execution**
+Each enemy controller runs an isolated state machine:
+```
+[IDLE] ----(Sight/Sound)----> [INVESTIGATE] ----(In Range)----> [TELEGRAPH]
+   ^                                                                 |
+   |                                                                 v
+[RECOVERY] <------------------(Animation End)------------------- [ATTACK]
+```
+State behaviors:
+*   **IDLE / PATROL:** follows path nodes (`Path3D`) at `50%` movement speed while running visual sweeps.
+*   **INVESTIGATE:** moves toward target noise/last-seen position at full speed, looking around for `3.0s`.
+*   **TELEGRAPH:** locks movement, turns smoothly toward player (`lerp_angle`), plays wind-up animation, and activates eye-glint particle indicator (`0.3s - 0.6s`).
+*   **ATTACK:** enables weapon hitbox `Area3D` collisions during active swing frames.
+*   **RECOVERY:** pauses attack logic for a configurable cooldown window (`0.8s - 1.5s`), circling or backstepping relative to the player before re-engaging.
+
 ### 8.1 Boss Phase Logic (Step 8 detail)
 *   **Phase 1 (100%–50% HP):** On crossing the 50% HP threshold, trigger invincibility (`invulnerable = true`), execute an area-of-effect knockback attack, activate arena wall hazards, and switch the active behavior tree.
 *   **Phase 2 (50%–0% HP):** Enraged attack speeds, flaming blade particle trails, expanded multi-hit combo strings, and stance-swapping logic (e.g., Lord Osamu mirroring Jin's active stance).
