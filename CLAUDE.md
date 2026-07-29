@@ -46,6 +46,8 @@ This project is independent — it has no relation to any other project in sibli
 
 Each of these 14 steps is executed through the **Director/subagent workflow** in Section 6, not implemented directly.
 
+**Steps 9–14 design pass:** unlike Steps 1–8 above, Steps 9–14 are not yet fully specced here. See `docs/DesignDoc.md` for a Genshin Impact / Elden Ring-referenced research pass covering region topology, itemization, HUD/save design, quest/dialogue structure, animation/audio, and economy balancing for those steps. It is **staged, not locked** — pending Director sign-off on its "Open Questions" section — and gets folded into this charter as a spec addendum once approved.
+
 ## 🔧 STEP DETAIL SPECIFICATIONS (Steps 2–7)
 
 ### STEP 2: Core Game State Machine & Global Event Bus
