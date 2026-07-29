@@ -6,7 +6,7 @@ Running index of every development cycle. One line per step/task, linking to its
 |------|------|--------|-----------|
 | 2026-07-29 | Step 1: Project Initialization & Directory Architecture | Done | [2026-07-29-step-1-project-init.md](Tasks/2026-07-29-step-1-project-init.md) |
 | 2026-07-29 | Step 2: Core Game State Machine & Global Event Bus | Done | [2026-07-29-step-2-fsm-eventbus.md](Tasks/2026-07-29-step-2-fsm-eventbus.md) |
-| 2026-07-29 | Design Research: Steps 9-14 (Genshin/Elden Ring reference pass) | Staged — pending Director sign-off on Open Questions | [DesignDoc.md](DesignDoc.md) |
+| 2026-07-29 | Design Research: Steps 9-14 (Genshin/Elden Ring reference pass) | Locked — Director resolved all Open Questions, condensed spec promoted into CLAUDE.md | [DesignDoc.md](DesignDoc.md) |
 
 ## Step 1: Project Initialization & Directory Architecture - 2026-07-29
 
