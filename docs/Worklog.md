@@ -8,6 +8,7 @@ Running index of every development cycle. One line per step/task, linking to its
 | 2026-07-29 | Step 2: Core Game State Machine & Global Event Bus | Done | [2026-07-29-step-2-fsm-eventbus.md](Tasks/2026-07-29-step-2-fsm-eventbus.md) |
 | 2026-07-29 | Design Research: Steps 9-14 (Genshin/Elden Ring reference pass) | Locked — Director resolved all Open Questions, condensed spec promoted into CLAUDE.md | [DesignDoc.md](DesignDoc.md) |
 | 2026-07-30 | Step 3: Abstracted Input System & Rolling Action Buffer | Done | [2026-07-30-step-3-input-buffer.md](Tasks/2026-07-30-step-3-input-buffer.md) |
+| 2026-07-30 | Step 4: 3D Kinematics, Movement Physics & Dodge Roll | Done | [2026-07-30-step-4-kinematics-dodge.md](Tasks/2026-07-30-step-4-kinematics-dodge.md) |
 
 ## Step 1: Project Initialization & Directory Architecture - 2026-07-29
 
@@ -70,3 +71,25 @@ N/A (no shipped-code bug this step).
 
 ### 💪 Game Feel Wins
 N/A — no gameplay/juice systems yet; this step is pure input plumbing consumed by Steps 4/5.
+
+## Step 4: 3D Kinematics, Movement Physics & Dodge Roll - 2026-07-30
+
+### 🧪 Tests
+Objective: prove camera-relative movement, lerped accel/friction, gravity, mesh lean, and dodge/i-frame timing all behave per the exact formulas/tick counts specified, against real Godot physics (not a pure-math mock). Method: `--import`/`--quit` smoke test (checked `GAMESTATE_OK`/`INPUTBUFFER_OK` sentinels), plus a dedicated `scripts/tests/kinematics_test.tscn` driven by real `await get_tree().physics_frame` ticks against a throwaway floor. QA independently re-verified all of it from scratch and went further: tested the camera-flatten fix at 4 additional pitches beyond the implementer's own -35° test, spot-checked the exact i-frame tick boundaries (8/9/21/22) for off-by-one errors, probed `start_dodge()` directly for stamina underflow, and traced the re-dodge-while-dodging path through `InputBuffer`'s real consume/expiry logic. Outcome: **PASS** — clean on Attempt 1, no fix-loop cycle. One latent (non-blocking) gap found and closed directly by the Director afterward (see Bugs/Cause). See task file for the full QA report.
+
+### 🔄 Changes
+- Added `scenes/player/player.tscn`: `CharacterBody3D` (`Body`) + `CapsuleShape3D` collider + placeholder `MeshInstance3D` (`CapsuleMesh`) that mesh-lean rotates, plus a `CamPivot(Node3D) -> SpringArm3D(length 5.5) -> Camera3D` rig wired as a **sibling** of `Body` (not a child), so the camera structurally cannot inherit mesh-lean rotation regardless of what `Body`'s script does.
+- Added `scripts/player/player.gd`: camera-relative movement using a **flattened** basis-multiply formula (`Vector3(raw.x, 0, raw.z).normalized()`) — a deliberate fix to a real bug in CLAUDE.md 4.1's literal (unflattened) formula, which Research proved injects a vertical component and shortens horizontal magnitude under any camera pitch. Also implements the lerped accel/friction (`alpha_accel=15`/`alpha_frict=20`), gravity (`24.5`), mesh lean (`-clamp(omega_yaw*0.1, ±5deg)`, `omega_yaw` derived from velocity-facing-angle delta since no rigged character exists yet), and dodge (tick-counted i-frames `[9,21]` inclusive = 0.15s-0.35s at 60 physics ticks/sec, speed taper 1.8x→1.0x over 30 ticks, 20.0 stamina cost, 1.2s regen-pause) consumed via `InputBuffer.consume_action(&"dodge")`. Stamina is a stub (`stamina_max`/`stamina`/`regen_pause_timer`, `# TODO(Step 5/14)` marked) — no real `Stamina` Resource or `EventBus` emission yet, to avoid Step 11's HUD later binding to a fake value. `S_speed=6.0` m/s and regen rate `10.0`/sec are both judgment calls (charter names no numbers for either).
+- Added `scripts/tests/kinematics_test.gd` + `.tscn`: headless harness with its own throwaway floor (kept out of `scenes/world/`, which Step 9's real greybox will own), asserting landing, the camera-flatten fix, the lerp curve, and dodge/stamina/regen timing via real physics ticks.
+- Updated this Worklog and `docs/Tasks/2026-07-30-step-4-kinematics-dodge.md`.
+
+### 🔴 Bugs/Cause
+Two things worth recording, neither a shipped-code defect that reached players:
+1. **Charter formula bug (caught pre-implementation, not shipped):** CLAUDE.md 4.1's literal camera-relative formula is wrong for any pitched camera — see Changes above. Fixed at the design stage via the sign-off, never actually implemented in its buggy form.
+2. **Latent API-safety gap (caught by QA, closed by the Director post-QA):** `start_dodge()` was implemented as a public method with no internal stamina check — only its single call site in `_physics_process` gated on `stamina >= 20.0`. Not an observable gameplay bug today (the only caller already guards it), but any future direct caller could have driven `stamina` negative. Root cause: the guard was written at the call site (correct, for a different reason — it also prevents consuming a buffered dodge press that can't take effect) but not defensively duplicated inside the method itself.
+
+### 🛠️ Fix/Prevention
+For gap #2: added `if is_dodging or stamina < DODGE_STAMINA_COST: return` as the first line of `start_dodge()`, kept the call-site check as-is (still needed so an un-actionable dodge press isn't silently eaten from `InputBuffer`). Re-ran all three headless checks (`--import`, `--quit`, `kinematics_test.tscn`) after the change — all still pass clean. Prevention: any future method exposing a resource-consuming action publicly should guard its own preconditions internally, not rely solely on being well-behaved at its current call site(s).
+
+### 💪 Game Feel Wins
+First real physical movement in the project — camera-relative walk/run with inertia (not instant-stop/instant-start), a dodge with a genuine speed burst and i-frame window, and a subtle mesh lean on direction changes. All still placeholder-mesh/no-animation (Step 13 territory), but the underlying feel curves (lerp rates, dodge taper) are now real, tested numbers rather than guesses.
