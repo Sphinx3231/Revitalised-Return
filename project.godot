@@ -26,3 +26,8 @@ window/stretch/aspect="expand"
 renderer/rendering_method="forward_plus"
 rendering_device/driver.windows="d3d12"
 textures/vram_compression/import_s3tc_bptc=true
+
+[autoload]
+
+EventBus="*res://autoload/event_bus.gd"
+GameState="*res://autoload/game_state.gd"

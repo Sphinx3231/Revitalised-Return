@@ -5,6 +5,7 @@ Running index of every development cycle. One line per step/task, linking to its
 | Date | Step | Status | Task File |
 |------|------|--------|-----------|
 | 2026-07-29 | Step 1: Project Initialization & Directory Architecture | Done | [2026-07-29-step-1-project-init.md](Tasks/2026-07-29-step-1-project-init.md) |
+| 2026-07-29 | Step 2: Core Game State Machine & Global Event Bus | Done | [2026-07-29-step-2-fsm-eventbus.md](Tasks/2026-07-29-step-2-fsm-eventbus.md) |
 
 ## Step 1: Project Initialization & Directory Architecture - 2026-07-29
 
@@ -26,3 +27,24 @@ None.
 
 ### 💪 Game Feel Wins
 N/A — no gameplay implemented in this step.
+
+## Step 2: Core Game State Machine & Global Event Bus - 2026-07-29
+
+### 🧪 Tests
+Objective: verify EventBus/GameState autoloads register and boot without error, and that the StanceData forward-reference doesn't break parsing. Method: `--import` then `--headless --quit` via `Godot_v4.7.1-stable_win64_console.exe`, grepped for ERROR/SCRIPT ERROR, checked for `GAMESTATE_OK INITIALIZING` sentinel. Outcome: **PASS** — both exit 0, no errors, sentinel present, StanceData registered as global class. See task file for full QA report.
+
+### 🔄 Changes
+- Added `autoload/event_bus.gd`: `EventBus` singleton with the three signal groups (Player & Vital, Combat & Damage, World & UI) verbatim per CLAUDE.md 2.1, plus `process_mode = Node.PROCESS_MODE_ALWAYS` set in `_ready()`.
+- Added `resources/stance_data.gd`: minimal 2-line `StanceData` stub (`class_name StanceData` / `extends Resource`, no properties) so `EventBus.gd`'s `stance_swapped(new_stance_resource: StanceData)` signal parses ahead of Step 5's full implementation.
+- Added `autoload/game_state.gd`: `GameState` singleton with the `State` enum (`INITIALIZING, MAIN_MENU, PLAYING, PAUSED, DIALOGUE, CUTSCENE, GAME_OVER`), `current_state` var, `set_state(new_state)` transition logic (mouse-mode + pause rules per CLAUDE.md 2.2), `process_mode = Node.PROCESS_MODE_ALWAYS` in `_ready()`, the new `is_player_input_locked() -> bool` helper, and a `GAMESTATE_OK` print sentinel for QA.
+- Updated `project.godot`: appended a new `[autoload]` section registering `EventBus="*res://autoload/event_bus.gd"` and `GameState="*res://autoload/game_state.gd"`, after the existing `[rendering]` section, with no other sections disturbed.
+- Updated this Worklog: added the Step 2 table row and this log entry.
+
+### 🔴 Bugs/Cause
+None.
+
+### 🛠️ Fix/Prevention
+None.
+
+### 💪 Game Feel Wins
+N/A
