@@ -10,6 +10,8 @@ Running index of every development cycle. One line per step/task, linking to its
 | 2026-07-30 | Step 3: Abstracted Input System & Rolling Action Buffer | Done | [2026-07-30-step-3-input-buffer.md](Tasks/2026-07-30-step-3-input-buffer.md) |
 | 2026-07-30 | Step 4: 3D Kinematics, Movement Physics & Dodge Roll | Done | [2026-07-30-step-4-kinematics-dodge.md](Tasks/2026-07-30-step-4-kinematics-dodge.md) |
 | 2026-07-30 | Step 5: Stance Engine, Hitbox Registration & Parry Logic | Done | [2026-07-30-step-5-stances-hitboxes.md](Tasks/2026-07-30-step-5-stances-hitboxes.md) |
+| 2026-07-30 | Step 6: 3D "Juice" Engine & Impact Feedback | Implementation complete, QA passed — never reached Director sign-off before the engine pivot below; archived as-is under `legacy-godot/` | [2026-07-30-step-6-juice-engine.md](Tasks/2026-07-30-step-6-juice-engine.md) |
+| 2026-07-31 | Engine Pivot: Godot 4/GDScript → Unity 6000.5.5f1/C# | Done — Godot work archived to `legacy-godot/`, charter rewritten, Unity skeleton created & QA'd | [2026-07-31-godot-to-unity-pivot.md](Tasks/2026-07-31-godot-to-unity-pivot.md) |
 
 ## Step 1: Project Initialization & Directory Architecture - 2026-07-29
 
@@ -118,3 +120,24 @@ N/A this step for the two Research-caught bugs (designed around before implement
 
 ### 💪 Game Feel Wins
 First real combat resolution in the project: stance-driven damage/posture math, a working parry (with a real attacker-posture punish) and block (partial mitigation, full posture bleed-through), and hitbox timing tied to genuine `AnimationPlayer` tracks rather than a placeholder timer — meaning Step 13's real animations can drive this exact mechanism with zero rework.
+
+## Engine Pivot: Godot 4/GDScript → Unity 6000.5.5f1/C# - 2026-07-31
+
+### 🧪 Tests
+Objective: prove the new Unity project skeleton actually runs headlessly, not just compiles, and matches the rewritten charter's folder/stub spec exactly. Method: `Unity.exe -batchmode -nographics -projectPath <repo root> -executeMethod Ping.Run -quit -logFile <log>`, independently re-run by QA (not trusting the implementer's self-report), plus an independent `find`-based walk of all 27 `Assets/` directories and a manual read-through of every stub script against CLAUDE.md 2.1/2.2. Outcome: **PASS** — exit 0, `PING_OK` present, zero `error CS`, all directories present, all stub scripts match spec. See task file for full QA report.
+
+### 🔄 Changes
+- Archived the entire Godot 4 implementation (`project.godot`, `icon.svg(.import)`, `autoload/`, `assets/`, `resources/`, `scenes/`, `scripts/`, including Step 6's never-committed juice-engine files) into `legacy-godot/` via `git mv`, with a new `legacy-godot/README.md` explaining the archive. Nothing deleted.
+- Rewrote `.gitignore`: added standard Unity ignores (`Library/`, `Temp/`, `Obj/`, IDE files, etc.), narrowed the old bare `.godot/` rule to `legacy-godot/.godot/`.
+- Rewrote `CLAUDE.md` in full: converted every Godot-specific API/architecture reference (autoloads, `Area3D`, `AnimationPlayer` tracks, `Resource`/`.tres`, signals, `Engine.time_scale`, folder structure, Director/subagent workflow's tooling references) to Unity/C# equivalents. Section 1 (World & Acts) and the Steps 9-14 locked design decisions are unchanged — only their data-structure notation was translated, not the decisions themselves.
+- Created a real Unity 6000.5.5f1 project at the repo root (`-createProject` targeting the existing non-empty repo root worked directly, no temp-and-move workaround needed) with the charter's full 27-directory `Assets/` structure, `Assets/Editor/Ping.cs` (NinjaGame's exact smoke-check convention), and Step-1-plus-stub-Step-2 skeleton scripts: `Assets/Scripts/Systems/EventBus.cs` (12 C# events per charter 2.1, declarations only), `Assets/Scripts/Systems/GameState.cs` (7-value `State` enum + stub `SetState()`/`IsPlayerInputLocked()`, `TODO(Step 2)` marked), `Assets/Scripts/Combat/StanceData.cs` (empty `ScriptableObject` stub, `TODO(Step 5)` marked).
+- Updated this Worklog and `docs/Tasks/2026-07-31-godot-to-unity-pivot.md`.
+
+### 🔴 Bugs/Cause
+None. Clean pass on Attempt 1, no fix-loop cycle.
+
+### 🛠️ Fix/Prevention
+N/A this step.
+
+### 💪 Game Feel Wins
+N/A — this is an engine/tooling pivot, not a gameplay-system step. The real Step 1-6 game-feel numbers (dodge i-frame ticks, parry windows, hit-stop duration, camera trauma decay) are preserved as a porting reference at `legacy-godot/` and named explicitly in `CLAUDE.md`'s "Current status" as what future Unity ports should carry forward rather than re-derive.

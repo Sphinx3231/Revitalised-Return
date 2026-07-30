@@ -1,5 +1,38 @@
-# Godot 4
-.godot/
+# Unity
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]serSettings/
+[Mm]emoryCaptures/
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+sysinfo.txt
+*.apk
+*.aab
+*.unitypackage
+*.app
+*.VC.db
+*.booproj
+*.svd
+crashlytics-build.properties
+
+# Unity generated meta for IDEs
+.vs/
+.vscode/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+
+# Legacy Godot 4 project (archived under legacy-godot/, no longer active)
+legacy-godot/.godot/
 *.translation
 export.cfg
 export_presets.cfg
