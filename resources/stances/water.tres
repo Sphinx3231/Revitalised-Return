@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="StanceData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/stance_data.gd" id="1_stance"]
+
+[resource]
+script = ExtResource("1_stance")
+stance_name = "water"
+base_damage_multiplier = 0.8
+posture_damage_multiplier = 0.6
+attack_speed_scalar = 1.3
+parry_window_duration = 0.15

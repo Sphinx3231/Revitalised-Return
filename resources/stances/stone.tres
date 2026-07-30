@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="StanceData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/stance_data.gd" id="1_stance"]
+
+[resource]
+script = ExtResource("1_stance")
+stance_name = "stone"
+base_damage_multiplier = 1.0
+posture_damage_multiplier = 1.8
+attack_speed_scalar = 0.7
+parry_window_duration = 0.12

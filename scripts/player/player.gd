@@ -48,6 +48,11 @@ var _prev_yaw_angle: float = 0.0
 
 @onready var mesh: MeshInstance3D = $MeshPlaceholder
 @onready var _cam_pivot: Node3D = get_parent().get_node_or_null(^"CamPivot")
+# Step 5: hurtbox composition (per the sign-off, Player does NOT extend
+# Combatant this step) -- is_invulnerable toggling disables/enables this
+# shape directly, matching Research's verified i-frame mechanism ("disable
+# the shape, not the parent Area3D").
+@onready var _hurtbox_shape: CollisionShape3D = $Hurtbox/CollisionShape3D
 
 
 func _physics_process(delta: float) -> void:
@@ -121,7 +126,7 @@ func start_dodge(d_input: Vector3) -> void:
 	_dodge_direction = direction.normalized()
 	_dodge_tick = 0
 	is_dodging = true
-	is_invulnerable = false
+	_set_invulnerable(false)
 	stamina -= DODGE_STAMINA_COST
 	regen_pause_timer = REGEN_PAUSE_DURATION
 
@@ -129,7 +134,7 @@ func start_dodge(d_input: Vector3) -> void:
 func _process_dodge() -> void:
 	_dodge_tick += 1
 
-	is_invulnerable = _dodge_tick >= DODGE_IFRAME_START_TICK and _dodge_tick <= DODGE_IFRAME_END_TICK
+	_set_invulnerable(_dodge_tick >= DODGE_IFRAME_START_TICK and _dodge_tick <= DODGE_IFRAME_END_TICK)
 
 	var progress: float = clampf(float(_dodge_tick) / float(DODGE_TOTAL_TICKS), 0.0, 1.0)
 	var speed_mult: float = lerpf(DODGE_SPEED_START_MULT, DODGE_SPEED_END_MULT, progress)
@@ -139,7 +144,7 @@ func _process_dodge() -> void:
 
 	if _dodge_tick >= DODGE_TOTAL_TICKS:
 		is_dodging = false
-		is_invulnerable = false
+		_set_invulnerable(false)
 
 
 func _process_stamina_regen(delta: float) -> void:
@@ -181,3 +186,9 @@ func _follow_camera_pivot() -> void:
 
 func is_player_invulnerable() -> bool:
 	return is_invulnerable
+
+
+func _set_invulnerable(value: bool) -> void:
+	is_invulnerable = value
+	if _hurtbox_shape:
+		_hurtbox_shape.disabled = value

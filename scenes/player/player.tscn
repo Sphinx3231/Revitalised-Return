@@ -21,6 +21,15 @@ shape = SubResource("CapsuleShape3D_1")
 [node name="MeshPlaceholder" type="MeshInstance3D" parent="Body"]
 mesh = SubResource("CapsuleMesh_1")
 
+[node name="Hurtbox" type="Area3D" parent="Body"]
+collision_layer = 32
+collision_mask = 0
+monitoring = false
+monitorable = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Body/Hurtbox"]
+shape = SubResource("CapsuleShape3D_1")
+
 [node name="CamPivot" type="Node3D" parent="."]
 rotation_degrees = Vector3(-35, 0, 0)
 

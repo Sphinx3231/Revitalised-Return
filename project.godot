@@ -17,6 +17,12 @@ config/icon="res://icon.svg"
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
+[layer_names]
+
+3d_physics/layer_6="player_hurtbox"
+3d_physics/layer_7="enemy_hurtbox"
+3d_physics/layer_8="hitbox"
+
 [physics]
 
 3d/physics_engine="Jolt Physics"
