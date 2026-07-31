@@ -37,6 +37,9 @@ legacy-godot/.godot/
 export.cfg
 export_presets.cfg
 
+# Claude Code — personal/local, not shared project config
+.claude/settings.local.json
+
 # OS
 .DS_Store
 Thumbs.db
