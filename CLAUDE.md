@@ -732,8 +732,19 @@ exists as the registered build-index-0 entry scene holding the `GameState` singl
 `docs/Tasks/2026-07-31-step-2-unity-eventbus-gamestate.md`. There's also a separate paused
 side-task, `docs/Tasks/2026-07-31-ui-systems-skeleton.md` (Input Actions asset, MainMenu/
 Settings scene, minimap, inventory data + UI stub) — its Input System compile blocker is
-resolved but its 5 deliverables are still unstarted; not yet resumed. **Next action:** Director
-opens a Step 3 task brief (Input System Input Actions asset + the 0.15s rolling action
-buffer), using the validated formulas/timings preserved in `legacy-godot/` as the reference
-implementation to port rather than re-deriving them from scratch — or, alternatively, resume
-the paused UI/systems skeleton side-task first if the user prioritizes it.
+resolved but its 5 deliverables are still unstarted; not yet resumed.
+
+**2026-07-31: user-directed sequencing deviation, logged per Director ruling.** At the user's
+explicit request, work is reprioritized to **Player base character → UI → Combat system**
+(user-facing/playable-first order) rather than continuing the charter's strict Step 3→14
+numeric order. The 14-step pipeline in Section 4 remains the documented reference sequence —
+this is a called-out reprioritization, not an amendment to that section — so each piece of
+this work should still be reconciled back to the step number(s) it actually satisfies (e.g.
+"Player base character" = Steps 3+4 compressed: Input System + the 0.15s action buffer +
+`CharacterController` kinematics + dodge roll, with a placeholder primitive mesh standing in
+for Step 13's real art). **Next action:** Director opens a task brief for the Player base
+character (functional placeholder: `CharacterController`, placeholder mesh, camera rig, real
+input-driven movement — not just a static mesh), using `legacy-godot/`'s validated Step 3/4
+formulas/timings as the porting reference. UI and Combat system phases follow after, each
+gets its own task brief per the Director/subagent pipeline in Section 6. All C# code across
+all three phases must follow the S.O.L.I.D. standard already locked in Section 2.
