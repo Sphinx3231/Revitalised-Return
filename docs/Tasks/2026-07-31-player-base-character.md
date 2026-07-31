@@ -206,3 +206,28 @@ File-verified (MCP connection was dead again this pass — reconnect before impl
   treated as "done" in a stronger sense than "compiles and is wired correctly."
 - **Sign-off: Player base character (Phase 1) complete** with the above gap explicitly noted.
   Ready for Phase 2 (UI systems) next, per the user-directed reprioritization.
+
+## Post-Signoff Bug (found via user manual Play Mode test — exactly the gap flagged above)
+- **Symptom:** user reported "controls aren't working" after manually pressing Play in
+  `MovementTest.unity`.
+- **Root cause:** `PlayerRoot.Update()` correctly gates all input processing on
+  `GameState.IsPlayerInputLocked()` (`CurrentState != Playing`) — but nothing ever calls
+  `GameState.SetState(Playing)` when a Sandbox scene is entered directly, since that
+  transition normally happens via the `Bootstrap` scene flow, which a sandbox test scene
+  intentionally skips (Step 2's own safety net only creates the `GameState` singleton, it
+  doesn't advance its state). `CurrentState` stays `Initializing` forever, so
+  `IsPlayerInputLocked()` returns `true` every frame and `PlayerRoot` silently no-ops.
+  Confirms the exact gap the Director flagged at sign-off ("no agent has actually run Play
+  Mode") — this is precisely the class of bug that check would have caught.
+- **Fix:** added `Assets/Scripts/Systems/SandboxAutoPlay.cs` — a small MonoBehaviour
+  (`Start() => GameState.SetState(State.Playing)`), explicitly scoped by its own doc-comment
+  to Sandbox test scenes only (never Bootstrap or real gameplay scenes, which own their own
+  transitions). Attached via a new `SandboxBootstrap` GameObject in `MovementTest.unity`.
+  First attempt at wiring this was made while the Editor was still in Play Mode (a Director
+  mistake, not a tool bug) — Unity discards non-persisted scene changes made during Play on
+  exit, so the GameObject silently vanished on Play Mode exit; caught by an independent
+  `gameobject-find` re-check after confirming Play Mode had actually ended, and redone
+  correctly in Edit mode, then re-verified present.
+- **Status:** fix applied and verified present in the saved scene; **awaiting user's manual
+  Play Mode re-test to confirm it actually resolves the reported symptom** before this is
+  closed out.
