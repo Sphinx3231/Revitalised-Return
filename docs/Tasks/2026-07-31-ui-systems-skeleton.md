@@ -96,9 +96,37 @@ skeleton, inventory data + UI stub) were never attempted.**
 Not run — task paused at the Director's instruction before Implementation cleared the
 package blocker. Nothing to QA yet (see Implementation Summary).
 
+## Blocker Resolution — 2026-07-31 (resumed)
+Research (self, Director): the `TreeView`/`TreeViewItem`/`TreeViewState` non-generic APIs
+became hard `CS0619` compile errors specifically in Unity `6000.5.0f1`/`6000.5.1f1` (this
+project is on `6000.5.5f1`). `com.unity.inputsystem` fixed its own `TreeView` usage for this
+Editor line in package version **1.15.0** (fix originally landed for the 6.2 beta), and
+Unity separately ships **1.20.0** as the version paired with the 6000.5 Editor branch. The
+original attempt topped out at `1.14.0` — one version short of the fix — which was a registry
+resolution ceiling in that run, not a real version-availability limit.
+
+Fix applied: pinned `"com.unity.inputsystem": "1.20.0"` in `Packages/manifest.json` (up from
+`1.14.0`) and re-ran the headless reimport. Result: **zero `error CS0619` (or any other
+compile errors)**, exit code 0. Independently re-verified with `-executeMethod Ping.Run`:
+exit 0, `PING_OK` present, zero compile errors — the project is back to a clean, verified
+baseline.
+
+**Concurrent, user-initiated change:** while this was being fixed, the user separately ran
+`unity-mcp-cli install-plugin` (a third-party open-source tool, `IvanMurzak/Unity-MCP`,
+verified legitimate before recommending it), which added `com.ivanmurzak.unity.mcp` and an
+OpenUPM scoped registry to the same `manifest.json`. The post-fix reimport verified the
+*combined* package set (Input System 1.20.0 + the MCP plugin together) compiles clean — not
+just the Input System fix in isolation.
+
+`com.unity.ugui` (added in the original attempt) also remains in `manifest.json`, resolved
+clean throughout (was never part of the blocker).
+
 ## Director Final Review
-**Paused mid-task (user requested "pause" / "save and end for a moment") — not resumed yet,
-not signed off, not marked done.** Status at pause point:
+**Paused mid-task (user requested "pause" / "save and end for a moment"), then resumed to
+clear the blocker above. Deliverables 2-6 (Input Actions asset, MainMenu/Settings scene,
+minimap skeleton, inventory data + UI stub) still not started — this session only cleared
+the compile blocker so the project is a safe, clean base to build them on next.** Status at
+this checkpoint:
 
 - Task brief and approach (above) are still valid and don't need rework.
 - Real blocker found: this Unity Editor build (`6000.5.5f1`) rejects the only
