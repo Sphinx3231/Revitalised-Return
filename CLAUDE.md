@@ -748,3 +748,16 @@ input-driven movement — not just a static mesh), using `legacy-godot/`'s valid
 formulas/timings as the porting reference. UI and Combat system phases follow after, each
 gets its own task brief per the Director/subagent pipeline in Section 6. All C# code across
 all three phases must follow the S.O.L.I.D. standard already locked in Section 2.
+
+**Player base character (Phase 1) is done:** Input Actions asset (`Assets/Settings/
+PlayerControls.inputactions`), a S.O.L.I.D.-split script set under `Assets/Scripts/Player/`
+(`InputBuffer`, `IMovementInput`, `IInvulnerabilityProvider`, `CameraRelativeInput`,
+`PlayerInputReader`, `PlayerMotor`, `DodgeAbility`, `MeshLean`, `PlayerRoot` — the last as a
+single explicit per-frame orchestrator, not relying on Script Execution Order), a Cinemachine
+3.x third-person camera rig, `Assets/Prefabs/Player/Player.prefab`, and
+`Assets/Scenes/Sandbox/MovementTest.unity` to exercise it — see
+`docs/Tasks/2026-07-31-player-base-character.md`. **Known gap:** no agent in the pipeline has
+actually run Play Mode and watched the capsule move (no Play-Mode-control MCP tool was
+available this session) — everything verified so far is compile-clean + correctly-wired, not
+manually gameplay-tested. **Next action:** a human Play Mode pass on `MovementTest.unity` to
+close that gap, then Director opens the Phase 2 (UI systems) task brief.

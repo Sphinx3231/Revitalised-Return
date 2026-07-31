@@ -1,0 +1,78 @@
+using UnityEngine;
+
+/// <summary>
+/// Thin orchestrator (charter S.O.L.I.D. split). Gates on GameState.IsPlayerInputLocked(),
+/// then this is the SINGLE actual per-frame driver for the player: it calls each
+/// component's explicit Tick method in order — input read -> buffer consume/dodge
+/// trigger check -> dodge tick -> motor tick -> lean tick — rather than relying on
+/// Unity's Script Execution Order settings. PlayerMotor, DodgeAbility, and MeshLean do
+/// NOT implement their own Update() for this reason; they are purely driven from here,
+/// so there is no risk of a component reading input/state that is a frame stale.
+/// </summary>
+public sealed class PlayerRoot : MonoBehaviour
+{
+    [SerializeField] private PlayerInputReader inputReader;
+    [SerializeField] private PlayerMotor motor;
+    [SerializeField] private DodgeAbility dodgeAbility;
+    [SerializeField] private MeshLean meshLean;
+    [SerializeField] private Transform cameraTransform;
+
+    /// <summary>
+    /// Internal reads of raw movement input go through this interface (Dependency
+    /// Inversion), not the concrete PlayerInputReader type — the serialized
+    /// PlayerInputReader field above exists only so Unity's Inspector can wire the
+    /// concrete MonoBehaviour, since interfaces aren't directly serializable.
+    /// </summary>
+    private IMovementInput _movementInput;
+
+    private Vector3 _lastNonZeroDirection = Vector3.forward;
+
+    private void Awake()
+    {
+        _movementInput = inputReader;
+    }
+
+    private void Update()
+    {
+        if (GameState.IsPlayerInputLocked())
+            return;
+
+        if (inputReader == null || motor == null || cameraTransform == null || _movementInput == null)
+            return;
+
+        float deltaTime = Time.deltaTime;
+
+        // 1. Read raw input and transform to a camera-relative, flattened direction.
+        Vector2 moveRaw = _movementInput.MoveRaw;
+        Vector3 direction = CameraRelativeInput.ToCameraRelative(moveRaw, cameraTransform);
+
+        motor.SetDesiredDirection(direction);
+
+        if (direction != Vector3.zero)
+        {
+            _lastNonZeroDirection = direction;
+        }
+
+        // 2. Consume a buffered dodge action, if any, and trigger the dodge.
+        if (dodgeAbility != null && inputReader.InputBuffer.TryConsume(InputBuffer.BufferedAction.Dodge, Time.time))
+        {
+            Vector3 dodgeDirection = direction != Vector3.zero ? direction : _lastNonZeroDirection;
+            dodgeAbility.TryDodge(dodgeDirection);
+        }
+
+        // 3. Dodge tick (may set/clear the motor's VelocityOverride for this frame).
+        if (dodgeAbility != null)
+        {
+            dodgeAbility.TickDodge(deltaTime);
+        }
+
+        // 4. Motor tick (consumes VelocityOverride if set, else the lerped kinematics).
+        motor.TickMotor(deltaTime);
+
+        // 5. Lean tick (reads the motor's freshly-updated HorizontalVelocity).
+        if (meshLean != null)
+        {
+            meshLean.TickLean(deltaTime);
+        }
+    }
+}
