@@ -651,6 +651,23 @@ Every step in Section 4 goes through this pipeline:
         found) in the task file — do not overwrite prior attempts.
     *   No step is marked done while QA reports unresolved issues.
 
+### Standing test-coverage gate (added 2026-08-01)
+Every future step's QA pass must include a **real, tool-measured ≥80% line coverage** of the
+step's newly-added logic-bearing code (`Assembly-CSharp`, measured via
+`com.unity.testtools.codecoverage` through the verified batchmode CLI mechanism — see
+`docs/Tasks/2026-08-01-test-coverage-pass-1.md` for the exact command and `pathFilters`
+syntax), not an estimate. Generated code (e.g. Input System `.inputactions` C# codegen),
+zero-IL files (interfaces, field-only data classes), and classes that would require a
+production-code restructure to test (e.g. an `Assembly-CSharp`/PlayMode-asmdef split) may be
+excluded from a step's coverage denominator **only with an explicit, logged Director
+justification in that step's task file** — never silently, and never by writing low-value/
+tautological tests just to move the number. If a measured pass falls short of 80%, the
+Director either (a) rules on a scope-boundary correction with justification and re-measures,
+or (b) reports the shortfall and keeps the step open — it is not committed/pushed as if
+satisfied. (Test Coverage Pass 1, covering all pre-existing work through Phase 3 slice 1,
+landed at 96.4% against an 85% target — see the task file above for the full precedent this
+convention is modeled on.)
+
 ### Model tiering for subagents
 When spawning pipeline subagents via the Agent tool, use:
 *   **Research Agent:** `opus` — research/design judgment calls get the strongest model.
@@ -778,18 +795,35 @@ system exists yet — that's Combat/Phase 3) with sane defaults, by design. See
 Input System blocker-resolution research, not deleted). **Same standing gap as Phase 1:** HUD
 render/update behavior not yet manually confirmed in Play Mode.
 
-**Phase 3, slice 1 (Player Vitals + Stance Switching) is done, QA passed clean:** the HUD now
-has a real, authoritative data source — `PlayerVitals` (`Assets/Scripts/Player/PlayerVitals.cs`,
-health/stamina/posture, fires `EventBus` on `Start()` and whenever stamina changes) and
-`StanceController` (Q/Tab cycles through the 4 Phase 2 stance assets, fires
-`StanceSwapped`). `DodgeAbility` now spends real stamina through a small `IStaminaSource`
-interface instead of its old internal stub. See
-`docs/Tasks/2026-08-01-player-vitals-stance-switching.md`. Explicitly out of scope this slice
-(deferred to Phase 3's next slice): hitboxes, damage resolution, parry/block, light/heavy
-attack — those need an actual opponent to test meaningfully. **Same standing gap as every
-phase so far:** no agent has run Play Mode and confirmed the stamina bar actually drains on
-dodge / regenerates after 1.2s, or that the stance diamond actually highlights on Q/Tab.
-**Next action:** a human Play Mode pass on `MovementTest.unity` (covering both this slice and
-Phase 2's still-unconfirmed HUD rendering), then Director opens the next Phase 3 slice
-(hitboxes/damage/parry, charter Step 5's full spec) once there's something for the player to
-fight.
+**Phase 3, slice 1 (Player Vitals + Stance Switching) is done, QA passed clean, and
+user-confirmed working in Play Mode** (dodge visibly drains/regens stamina, Q/Tab visibly
+cycles the stance diamond) — `PlayerVitals`/`StanceController` per
+`docs/Tasks/2026-08-01-player-vitals-stance-switching.md`. A related cursor bug (same root
+cause class as the Phase 1 `SandboxAutoPlay` fix — `MainMenu.unity` never called
+`GameState.SetState(MainMenu)`, so the cursor never unlocked) was found and fixed via
+`Assets/Scripts/UI/MainMenuAutoState.cs`.
+
+**2026-08-01: the ad-hoc weapon-hitbox/enemy-AI slice work (a "combat-resolution-core" task
+brief, `docs/Tasks/2026-08-01-combat-resolution-core.md`) was cancelled by the user before
+implementation started** — no code was written against it. Per the user's explicit
+instruction, the project **reverts to the charter's strict Step 3→14 numeric order** rather
+than continuing the character→UI→combat reprioritization further. Steps 1-4 are done (via the
+reprioritized phases above, which map cleanly onto them). Step 5 (Stance Engine, Hitbox
+Registration & Parry Logic) is **partially done** — the stance data model (`StanceData`,
+`StanceController`) and vitals (`PlayerVitals`) exist, but hitbox/hurtbox trigger-collider
+resolution, damage math, and parry/block logic do not yet.
+
+**2026-08-01: Test Coverage Pass 1 is done.** At the user's request, established a real,
+tool-measured coverage baseline across all pre-existing work (Steps 1-4 + partial 5/11) before
+continuing the roadmap: 133 EditMode tests, **96.4% line coverage** (target 85%), 0 failures,
+QA-verified as meaningful (no tautological/padding tests) — see
+`docs/Tasks/2026-08-01-test-coverage-pass-1.md`. Two justified, logged scope exclusions:
+generated code (`PlayerControls.cs`) and two classes genuinely blocked by a real Unity
+assembly-definition constraint (`NoticeDisplay.cs`/`VitalsFader.cs` — PlayMode-testing them
+would require restructuring `Assets/Scripts/` into its own `.asmdef`, deferred as a named gap
+rather than forced through as a side effect of a testing task). **This established a standing
+80%-coverage gate on every future step**, now logged in Section 6.
+
+**Next action:** Director opens a proper Step 5 task brief (Stance Engine, Hitbox Registration
+& Parry Logic, charter's full spec — not the cancelled ad-hoc slice breakdown) in strict
+14-step order, carrying the new 80% coverage gate as part of its own Definition of Done.
