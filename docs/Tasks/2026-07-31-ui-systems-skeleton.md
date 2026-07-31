@@ -1,5 +1,14 @@
 # UI & Core Systems Skeleton Pass (Settings / Main Menu / Keybinds / Minimap / Inventory) — 2026-07-31
 
+> **SUPERSEDED 2026-07-31.** Deliverable 1 (Input Actions asset) was completed instead as part
+> of `docs/Tasks/2026-07-31-player-base-character.md` (Phase 1). Deliverables 2-3 (MainMenu/
+> Settings scene, no minimap this pass) were completed instead as part of
+> `docs/Tasks/2026-07-31-ui-systems-phase2.md` (Phase 2). Deliverables 5-6 (inventory data
+> types + UI stub) remain genuinely unstarted — out of scope for both — and are deferred to
+> Step 10 proper. This file is kept for its research/blocker-resolution record (the Input
+> System `TreeView` compile-blocker investigation below remains accurate and useful), not
+> deleted.
+
 ## Task Brief (Director)
 - **Goal:** at the user's explicit request, begin a breadth-first **skeleton** pass across
   several systems that normally belong to separate later pipeline steps — Keybinds (Step

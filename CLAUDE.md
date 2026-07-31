@@ -762,5 +762,20 @@ user's manual Play Mode test (controls silently no-op'd because `GameState` neve
 `Assets/Scripts/Systems/SandboxAutoPlay.cs`, confirmed working. **Standing lesson:** no
 Play-Mode-control MCP tool has been found in this toolset across two pipeline cycles now — a
 human manual Play Mode pass is required to catch this class of bug; static/compile
-verification alone is not sufficient sign-off for gameplay-behavior tasks. **Next action:**
-Director opens the Phase 2 (UI systems) task brief.
+verification alone is not sufficient sign-off for gameplay-behavior tasks.
+
+**UI systems (Phase 2) is done, QA passed:** a S.O.L.I.D.-split reactive HUD per Step 11's
+locked design (`Assets/Scripts/UI/`: `HealthBar`/`StaminaBar`/`PostureBar` each independently
+subscribed to their one `EventBus` event, a shared `VitalsFader` for the 5s-idle-fade rule,
+`StanceDiamond`, `NoticeDisplay`, thin `HUDRoot`), built live into `MovementTest.unity`; a
+`MainMenu.unity` scene (Play/Settings/Quit, Settings stub, intentionally not wired into
+`EditorBuildSettings` yet); and 4 placeholder `StanceData` assets
+(`Assets/ScriptableObjects/Stances/`) since the stance diamond needed something real to
+reference. Everything works against zero real emitters right now (no health/stamina/posture
+system exists yet — that's Combat/Phase 3) with sane defaults, by design. See
+`docs/Tasks/2026-07-31-ui-systems-phase2.md`; supersedes the paused
+`docs/Tasks/2026-07-31-ui-systems-skeleton.md`'s HUD/menu deliverables (kept for its still-useful
+Input System blocker-resolution research, not deleted). **Same standing gap as Phase 1:** HUD
+render/update behavior not yet manually confirmed in Play Mode. **Next action:** a human Play
+Mode pass on `MovementTest.unity` to confirm the HUD, then Director opens the Phase 3
+(Combat system) task brief.
