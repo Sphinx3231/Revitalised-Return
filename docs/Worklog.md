@@ -12,6 +12,7 @@ Running index of every development cycle. One line per step/task, linking to its
 | 2026-07-30 | Step 5: Stance Engine, Hitbox Registration & Parry Logic | Done | [2026-07-30-step-5-stances-hitboxes.md](Tasks/2026-07-30-step-5-stances-hitboxes.md) |
 | 2026-07-30 | Step 6: 3D "Juice" Engine & Impact Feedback | Implementation complete, QA passed — never reached Director sign-off before the engine pivot below; archived as-is under `legacy-godot/` | [2026-07-30-step-6-juice-engine.md](Tasks/2026-07-30-step-6-juice-engine.md) |
 | 2026-07-31 | Engine Pivot: Godot 4/GDScript → Unity 6000.5.5f1/C# | Done — Godot work archived to `legacy-godot/`, charter rewritten, Unity skeleton created & QA'd | [2026-07-31-godot-to-unity-pivot.md](Tasks/2026-07-31-godot-to-unity-pivot.md) |
+| 2026-07-31 | Step 2 (Unity port): EventBus + GameState — full implementation | Done — event raise-helpers, real SetState() transition table, Bootstrap scene at build index 0, QA passed | [2026-07-31-step-2-unity-eventbus-gamestate.md](Tasks/2026-07-31-step-2-unity-eventbus-gamestate.md) |
 
 ## Step 1: Project Initialization & Directory Architecture - 2026-07-29
 

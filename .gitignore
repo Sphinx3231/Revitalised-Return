@@ -40,6 +40,9 @@ export_presets.cfg
 # Claude Code — personal/local, not shared project config
 .claude/settings.local.json
 
+# Unity-MCP (AI Game Developer) — per-machine enrollment marker, not shared project config
+.ai-game-dev/
+
 # OS
 .DS_Store
 Thumbs.db

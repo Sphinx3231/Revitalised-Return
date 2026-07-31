@@ -720,10 +720,20 @@ out) is archived at `legacy-godot/`, not deleted — see that folder's `README.m
 it's content/design work, not engine-specific.
 
 A fresh Unity project skeleton now exists at the repo root (Editor `6000.5.5f1`, matching
-NinjaGame's installed version) with the `Assets/` folder structure above in place, the
-`Ping.cs` headless smoke-check script, and stub `EventBus.cs`/`GameState.cs` singletons —
-this is the Unity-side re-run of Step 1 (+ a head start on Step 2's skeleton), not yet a
-full re-implementation of Steps 2-6's actual gameplay logic. **Next action:** Director opens
-a proper Step 2 task brief to port `EventBus`/`GameState` from stub to spec, followed by
-Steps 3-6 in order, using the validated formulas/timings preserved in `legacy-godot/` as the
-reference implementation to port rather than re-deriving them from scratch.
+NinjaGame's installed version) with the `Assets/` folder structure above in place and the
+`Ping.cs` headless smoke-check script. The Unity-MCP plugin (`IvanMurzak/Unity-MCP`) is
+installed and connected — pipeline agents use its live-Editor tools (scene/GameObject/
+component creation, `console-get-logs`, `script-execute`, etc.) to verify changes against the
+running Editor rather than editing files blind. **Step 2 (Unity port) is done:**
+`EventBus.cs`/`GameState.cs` are fully implemented per 2.1/2.2 (event raise-helpers, the real
+`SetState()` cursor-lock/`Time.timeScale` transition table, a `RuntimeInitializeOnLoadMethod`
+singleton safety net for entering Sandbox scenes directly), and `Assets/Scenes/Bootstrap.unity`
+exists as the registered build-index-0 entry scene holding the `GameState` singleton — see
+`docs/Tasks/2026-07-31-step-2-unity-eventbus-gamestate.md`. There's also a separate paused
+side-task, `docs/Tasks/2026-07-31-ui-systems-skeleton.md` (Input Actions asset, MainMenu/
+Settings scene, minimap, inventory data + UI stub) — its Input System compile blocker is
+resolved but its 5 deliverables are still unstarted; not yet resumed. **Next action:** Director
+opens a Step 3 task brief (Input System Input Actions asset + the 0.15s rolling action
+buffer), using the validated formulas/timings preserved in `legacy-godot/` as the reference
+implementation to port rather than re-deriving them from scratch — or, alternatively, resume
+the paused UI/systems skeleton side-task first if the user prioritizes it.

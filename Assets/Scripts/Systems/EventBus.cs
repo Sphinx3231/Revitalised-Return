@@ -23,6 +23,24 @@ public static class EventBus
     public static event Action<Transform> InteractionTriggered;
     public static event Action<string, float> ShowNotice;        // text, duration
 
-    // TODO(Step 2): raise-helper methods / null-conditional invoke wrappers once real
-    // systems start firing these events.
+    // Raise-helper methods: one per event, wrapping the null-conditional invoke so calling
+    // code never repeats that pattern.
+
+    // Player & Vital Events
+    public static void RaisePlayerHealthChanged(float current, float max) => PlayerHealthChanged?.Invoke(current, max);
+    public static void RaisePlayerStaminaChanged(float current, float max) => PlayerStaminaChanged?.Invoke(current, max);
+    public static void RaisePlayerPostureChanged(float current, float max) => PlayerPostureChanged?.Invoke(current, max);
+    public static void RaiseStanceSwapped(StanceData stance) => StanceSwapped?.Invoke(stance);
+    public static void RaisePlayerDied() => PlayerDied?.Invoke();
+
+    // Combat & Damage Events
+    public static void RaiseEntityDamaged(Transform target, float amount, bool isCritical) => EntityDamaged?.Invoke(target, amount, isCritical);
+    public static void RaisePostureBroken(Transform target) => PostureBroken?.Invoke(target);
+    public static void RaiseParryExecuted(Transform attacker, Transform defender) => ParryExecuted?.Invoke(attacker, defender);
+    public static void RaiseEnemyKilled(Transform enemy, int expReward) => EnemyKilled?.Invoke(enemy, expReward);
+
+    // World & UI Events
+    public static void RaiseQuestStateUpdated(string questId, int state) => QuestStateUpdated?.Invoke(questId, state);
+    public static void RaiseInteractionTriggered(Transform target) => InteractionTriggered?.Invoke(target);
+    public static void RaiseShowNotice(string text, float duration) => ShowNotice?.Invoke(text, duration);
 }
