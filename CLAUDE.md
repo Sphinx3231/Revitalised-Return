@@ -38,6 +38,18 @@ references throughout this charter are now Unity types (`CharacterController`, t
     *   Damage = (Base + Weapon) × (1 - Armor / (Armor + 100))
 *   **Input Queue:** Rolling 0.15s C# buffer (`List<BufferedInput>` or ring buffer) for combo
     buffering — same design as Godot's Array buffer, just a C# collection.
+*   **Coding standard — S.O.L.I.D.:** all C# code (systems, player, AI, combat, UI) must
+    adhere to the S.O.L.I.D. principles — Single Responsibility (one class, one reason to
+    change — e.g. don't fold input handling into `GameState`), Open/Closed (extend via new
+    types/interfaces rather than branching on type checks — e.g. new enemy behaviors as new
+    FSM state components, not `if` chains in one god-state), Liskov Substitution (a subclass
+    must be usable anywhere its base type is expected — e.g. any `Interactable` subclass must
+    honor the base contract), Interface Segregation (small, role-specific interfaces over one
+    fat interface — e.g. don't force every `Interactable` to implement HUD-prompt methods it
+    doesn't need), and Dependency Inversion (depend on abstractions, not concrete types — e.g.
+    `EventBus` static events instead of hard references between systems, per the Signal Up
+    pattern above). Implementation Agents apply this while writing; the Director's Section 6
+    final review explicitly checks for SOLID violations alongside its other review criteria.
 
 ## 🛠️ 3. GAME FEEL & POLISH RULES
 *   **Silhouettes:** Top-knot, haori cloth physics (Unity `Cloth` component or bone-spring
@@ -652,7 +664,9 @@ When spawning pipeline subagents via the Agent tool, use:
         bugs, dead code, inconsistent naming, missed edge cases (e.g. enemy losing perception
         mid-telegraph, save/load state, pause behavior, event unsubscription/leaks — Unity's
         C# events need explicit `-=` cleanup on destroy or they leak references, unlike
-        Godot's signal auto-disconnect-on-free).
+        Godot's signal auto-disconnect-on-free), and S.O.L.I.D. violations per Section 2's
+        coding standard (god-classes, type-check branching that should be polymorphism, fat
+        interfaces, concrete-type coupling that should go through `EventBus`/interfaces).
     *   Flags anything questionable explicitly rather than staying silent about it.
     *   Only after this review, and a clean QA pass, does the Director mark the step complete
         and finalize the task log with a sign-off summary.
