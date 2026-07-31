@@ -16,6 +16,9 @@ public sealed class PlayerInputReader : MonoBehaviour, IMovementInput
 
     public Vector2 MoveRaw => _controls != null ? _controls.Player.move.ReadValue<Vector2>() : Vector2.zero;
 
+    public event System.Action StanceNextPressed;
+    public event System.Action StancePrevPressed;
+
     private void Awake()
     {
         _controls = new PlayerControls();
@@ -24,6 +27,8 @@ public sealed class PlayerInputReader : MonoBehaviour, IMovementInput
         _controls.Player.heavy_attack.performed += OnHeavyAttackPerformed;
         _controls.Player.parry.performed += OnParryPerformed;
         _controls.Player.dodge.performed += OnDodgePerformed;
+        _controls.Player.stance_next.performed += OnStanceNextPerformed;
+        _controls.Player.stance_prev.performed += OnStancePrevPerformed;
     }
 
     private void OnEnable()
@@ -45,6 +50,8 @@ public sealed class PlayerInputReader : MonoBehaviour, IMovementInput
         _controls.Player.heavy_attack.performed -= OnHeavyAttackPerformed;
         _controls.Player.parry.performed -= OnParryPerformed;
         _controls.Player.dodge.performed -= OnDodgePerformed;
+        _controls.Player.stance_next.performed -= OnStanceNextPerformed;
+        _controls.Player.stance_prev.performed -= OnStancePrevPerformed;
 
         _controls.Dispose();
         _controls = null;
@@ -76,5 +83,19 @@ public sealed class PlayerInputReader : MonoBehaviour, IMovementInput
         if (GameState.IsPlayerInputLocked())
             return;
         _inputBuffer.Push(InputBuffer.BufferedAction.Dodge, Time.time);
+    }
+
+    private void OnStanceNextPerformed(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    {
+        if (GameState.IsPlayerInputLocked())
+            return;
+        StanceNextPressed?.Invoke();
+    }
+
+    private void OnStancePrevPerformed(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    {
+        if (GameState.IsPlayerInputLocked())
+            return;
+        StancePrevPressed?.Invoke();
     }
 }

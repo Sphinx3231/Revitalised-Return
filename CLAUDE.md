@@ -776,6 +776,20 @@ system exists yet — that's Combat/Phase 3) with sane defaults, by design. See
 `docs/Tasks/2026-07-31-ui-systems-phase2.md`; supersedes the paused
 `docs/Tasks/2026-07-31-ui-systems-skeleton.md`'s HUD/menu deliverables (kept for its still-useful
 Input System blocker-resolution research, not deleted). **Same standing gap as Phase 1:** HUD
-render/update behavior not yet manually confirmed in Play Mode. **Next action:** a human Play
-Mode pass on `MovementTest.unity` to confirm the HUD, then Director opens the Phase 3
-(Combat system) task brief.
+render/update behavior not yet manually confirmed in Play Mode.
+
+**Phase 3, slice 1 (Player Vitals + Stance Switching) is done, QA passed clean:** the HUD now
+has a real, authoritative data source — `PlayerVitals` (`Assets/Scripts/Player/PlayerVitals.cs`,
+health/stamina/posture, fires `EventBus` on `Start()` and whenever stamina changes) and
+`StanceController` (Q/Tab cycles through the 4 Phase 2 stance assets, fires
+`StanceSwapped`). `DodgeAbility` now spends real stamina through a small `IStaminaSource`
+interface instead of its old internal stub. See
+`docs/Tasks/2026-08-01-player-vitals-stance-switching.md`. Explicitly out of scope this slice
+(deferred to Phase 3's next slice): hitboxes, damage resolution, parry/block, light/heavy
+attack — those need an actual opponent to test meaningfully. **Same standing gap as every
+phase so far:** no agent has run Play Mode and confirmed the stamina bar actually drains on
+dodge / regenerates after 1.2s, or that the stance diamond actually highlights on Q/Tab.
+**Next action:** a human Play Mode pass on `MovementTest.unity` (covering both this slice and
+Phase 2's still-unconfirmed HUD rendering), then Director opens the next Phase 3 slice
+(hitboxes/damage/parry, charter Step 5's full spec) once there's something for the player to
+fight.

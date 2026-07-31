@@ -20,7 +20,9 @@ public sealed class DodgeAbility : MonoBehaviour, IInvulnerabilityProvider
 
     [SerializeField] private PlayerMotor motor;
     [SerializeField] private Collider hurtboxCollider;
-    [SerializeField] private float stamina = 100f;
+    [SerializeField] private PlayerVitals vitals;
+
+    private IStaminaSource _staminaSource;
 
     private bool _isDodging;
     private float _elapsed;
@@ -35,6 +37,8 @@ public sealed class DodgeAbility : MonoBehaviour, IInvulnerabilityProvider
         {
             motor = GetComponent<PlayerMotor>();
         }
+
+        _staminaSource = vitals;
     }
 
     public void TryDodge(Vector3 direction)
@@ -42,7 +46,7 @@ public sealed class DodgeAbility : MonoBehaviour, IInvulnerabilityProvider
         if (_isDodging)
             return;
 
-        if (stamina < StaminaCost)
+        if (_staminaSource == null || !_staminaSource.TrySpend(StaminaCost))
             return;
 
         if (motor == null)
@@ -51,7 +55,6 @@ public sealed class DodgeAbility : MonoBehaviour, IInvulnerabilityProvider
         if (direction == Vector3.zero)
             direction = transform.forward;
 
-        stamina -= StaminaCost;
         _dodgeDirection = direction.normalized;
         _elapsed = 0f;
         _isDodging = true;

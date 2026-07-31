@@ -4,10 +4,12 @@ using UnityEngine;
 /// Thin orchestrator (charter S.O.L.I.D. split). Gates on GameState.IsPlayerInputLocked(),
 /// then this is the SINGLE actual per-frame driver for the player: it calls each
 /// component's explicit Tick method in order — input read -> buffer consume/dodge
-/// trigger check -> dodge tick -> motor tick -> lean tick — rather than relying on
-/// Unity's Script Execution Order settings. PlayerMotor, DodgeAbility, and MeshLean do
-/// NOT implement their own Update() for this reason; they are purely driven from here,
-/// so there is no risk of a component reading input/state that is a frame stale.
+/// trigger check -> dodge tick -> motor tick -> vitals regen -> lean tick — rather than
+/// relying on Unity's Script Execution Order settings. PlayerMotor, DodgeAbility,
+/// PlayerVitals, and MeshLean do NOT implement their own Update() for this reason; they
+/// are purely driven from here, so there is no risk of a component reading input/state
+/// that is a frame stale. Stance switching (StanceController) is invoked directly from
+/// the input events instead, since it's a discrete action, not continuous per-frame state.
 /// </summary>
 public sealed class PlayerRoot : MonoBehaviour
 {
@@ -16,6 +18,8 @@ public sealed class PlayerRoot : MonoBehaviour
     [SerializeField] private DodgeAbility dodgeAbility;
     [SerializeField] private MeshLean meshLean;
     [SerializeField] private Transform cameraTransform;
+    [SerializeField] private PlayerVitals vitals;
+    [SerializeField] private StanceController stanceController;
 
     /// <summary>
     /// Internal reads of raw movement input go through this interface (Dependency
@@ -30,6 +34,31 @@ public sealed class PlayerRoot : MonoBehaviour
     private void Awake()
     {
         _movementInput = inputReader;
+
+        if (inputReader != null)
+        {
+            inputReader.StanceNextPressed += HandleStanceNext;
+            inputReader.StancePrevPressed += HandleStancePrev;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (inputReader != null)
+        {
+            inputReader.StanceNextPressed -= HandleStanceNext;
+            inputReader.StancePrevPressed -= HandleStancePrev;
+        }
+    }
+
+    private void HandleStanceNext()
+    {
+        stanceController?.CycleNext();
+    }
+
+    private void HandleStancePrev()
+    {
+        stanceController?.CyclePrevious();
     }
 
     private void Update()
@@ -69,7 +98,13 @@ public sealed class PlayerRoot : MonoBehaviour
         // 4. Motor tick (consumes VelocityOverride if set, else the lerped kinematics).
         motor.TickMotor(deltaTime);
 
-        // 5. Lean tick (reads the motor's freshly-updated HorizontalVelocity).
+        // 5. Vitals regen tick (stamina regen after the locked pause window).
+        if (vitals != null)
+        {
+            vitals.TickRegen(deltaTime);
+        }
+
+        // 6. Lean tick (reads the motor's freshly-updated HorizontalVelocity).
         if (meshLean != null)
         {
             meshLean.TickLean(deltaTime);

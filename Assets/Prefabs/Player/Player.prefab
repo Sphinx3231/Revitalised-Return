@@ -15,6 +15,8 @@ GameObject:
   - component: {fileID: 615424539033865174}
   - component: {fileID: 2533793276875557169}
   - component: {fileID: 5857931397369581269}
+  - component: {fileID: 4283974548222327163}
+  - component: {fileID: 1879014988041329061}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -101,7 +103,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DodgeAbility
   motor: {fileID: 6102237155468337713}
   hurtboxCollider: {fileID: 0}
-  stamina: 100
+  vitals: {fileID: 4283974548222327163}
 --- !u!114 &2533793276875557169
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -133,6 +135,40 @@ MonoBehaviour:
   dodgeAbility: {fileID: 615424539033865174}
   meshLean: {fileID: 2533793276875557169}
   cameraTransform: {fileID: 0}
+  vitals: {fileID: 4283974548222327163}
+  stanceController: {fileID: 1879014988041329061}
+--- !u!114 &4283974548222327163
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 827977809577014759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d446fe9fd49fcf24e8cef62058c2455b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerVitals
+  maxHealth: 100
+  maxStamina: 100
+  maxPosture: 100
+--- !u!114 &1879014988041329061
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 827977809577014759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edfcd4a7fae223a46a683ce92d198959, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StanceController
+  stances:
+  - {fileID: 11400000, guid: 6fcefa6008e12f4489b0d97efa22d148, type: 2}
+  - {fileID: 11400000, guid: 82349ff8734b4bf48b4208295e3c70e7, type: 2}
+  - {fileID: 11400000, guid: 0e52fe2af22d038449b2b6d0fc829c1b, type: 2}
+  - {fileID: 11400000, guid: 12af0aff20adbd7478a724f1386cc741, type: 2}
 --- !u!1 &6280942237268246842
 GameObject:
   m_ObjectHideFlags: 0
