@@ -691,6 +691,112 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19902e8975bf1fb43b3f7054b2c3809c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeshLean
+--- !u!1 &760452508
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 760452514}
+  - component: {fileID: 760452513}
+  - component: {fileID: 760452512}
+  - component: {fileID: 760452511}
+  - component: {fileID: 760452510}
+  - component: {fileID: 760452509}
+  m_Layer: 0
+  m_Name: JuiceCoordinator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &760452509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 760452508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ae5bc3c0692e3742b160c54cc55fd59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JuiceCoordinator
+  hitStopCoordinator: {fileID: 760452513}
+  cameraTrauma: {fileID: 760452512}
+  hitFlash: {fileID: 8413815604607283330}
+  trailActivator: {fileID: 760452511}
+--- !u!114 &760452510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 760452508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1a97e1932ab08b44a438332a29970c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SparkPool
+  sparkPrefab: {fileID: 32173658733812797, guid: b920870d44d3d5f4cb1857a29aec0d56, type: 3}
+  poolSize: 24
+--- !u!114 &760452511
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 760452508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2e11150dc8b6814f87af79b88ca2f19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrailActivator
+  trailRenderer: {fileID: 1246992232190894458}
+  attackController: {fileID: 1246992232190894457}
+--- !u!114 &760452512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 760452508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ecdfa880a75fa447bc363514389f488, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraTrauma
+  perlin: {fileID: 1706800312}
+  maxAmplitude: 2
+--- !u!114 &760452513
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 760452508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9725effe82d5a2c45b85a2ae433a8491, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HitStopCoordinator
+--- !u!4 &760452514
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 760452508}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &872715008
 GameObject:
   m_ObjectHideFlags: 0
@@ -1152,6 +1258,7 @@ GameObject:
   - component: {fileID: 1706800310}
   - component: {fileID: 1706800309}
   - component: {fileID: 1706800308}
+  - component: {fileID: 1706800312}
   m_Layer: 0
   m_Name: PlayerFollowCam
   m_TagString: Untagged
@@ -1265,6 +1372,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1706800312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1706800307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68bb026fafb42b14791938953eaace77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineBasicMultiChannelPerlin
+  NoiseProfile: {fileID: 11400000, guid: 69ce8388f6785dd4c8c39915efece2f4, type: 2}
+  PivotOffset: {x: 0, y: 0, z: 0}
+  AmplitudeGain: 0
+  FrequencyGain: 1
+  m_NoiseOffsets: {x: 0, y: 0, z: 0}
 --- !u!1 &1792017647
 GameObject:
   m_ObjectHideFlags: 0
@@ -1783,11 +1907,31 @@ PrefabInstance:
       propertyPath: cameraTransform
       value: 
       objectReference: {fileID: 1792017650}
+    - target: {fileID: 7877229747509350040, guid: bb586b9e0ee886343a80d108a774cafb, type: 3}
+      propertyPath: sparkPool
+      value: 
+      objectReference: {fileID: 760452510}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bb586b9e0ee886343a80d108a774cafb, type: 3}
+--- !u!114 &1246992232190894457 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2521862672704261917, guid: bb586b9e0ee886343a80d108a774cafb, type: 3}
+  m_PrefabInstance: {fileID: 1246992232190894456}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df59e2a4999e8f946862770729f08a0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AttackController
+--- !u!96 &1246992232190894458 stripped
+TrailRenderer:
+  m_CorrespondingSourceObject: {fileID: 503359729483869350, guid: bb586b9e0ee886343a80d108a774cafb, type: 3}
+  m_PrefabInstance: {fileID: 1246992232190894456}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8413815604607283329
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1845,6 +1989,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0e044c079ceb1df47932eff2a7f9f41a, type: 3}
+--- !u!114 &8413815604607283330 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6663799491912113957, guid: 0e044c079ceb1df47932eff2a7f9f41a, type: 3}
+  m_PrefabInstance: {fileID: 8413815604607283329}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4271df098e3af142a803ef2d82725c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HitFlash
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1858,3 +2013,4 @@ SceneRoots:
   - {fileID: 675416585}
   - {fileID: 233762191}
   - {fileID: 8413815604607283329}
+  - {fileID: 760452514}

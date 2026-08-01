@@ -843,6 +843,24 @@ verified by a human until Step 7/8 delivers an actual enemy that can attack — 
 via unit tests scrutinized specifically for this risk (genuinely-distinct attacker/defender
 mocks, not a shared mock that could mask a wrong-target bug).
 
-**Next action:** Director opens the Step 6 task brief (3D "Juice" Engine — hit-stop,
-camera trauma shake, hit-flash VFX, weapon arc trails) in strict 14-step order, carrying the
-same 80% coverage gate.
+**2026-08-01: Step 6 (Unity port) is done, pending human Play Mode confirmation.**
+`HitStopCoordinator`/`CameraTrauma`/`HitFlash`/`SparkPool`/`TrailActivator` (all
+`Assets/Scripts/Combat/Juice/`) implement charter 6.1-6.3: freeze-frame hit-stop (locked
+0.03-0.06s range, correctly restores `Time.timeScale=1f`), camera trauma shake via
+Cinemachine's own `CinemachineBasicMultiChannelPerlin` (Ruling: engine-idiom substitution for
+the noise sampler, locked trauma-squared-decay formula unchanged — `AmplitudeGain =
+maxAmplitude × trauma²`, decay `1.5/s`), a hand-written ShaderLab `_FlashIntensity` hit-flash
+applied via `MaterialPropertyBlock`, a 24-instance pooled spark `ParticleSystem` (never
+`Instantiate()`s per-hit), and a `TrailRenderer` mirroring `AttackController`'s attack window.
+Contact point/normal for VFX are approximated directly in `WeaponHitbox` (Ruling: local direct
+calls, not an `EventBus.EntityDamaged` signature change — that event stays untouched). **227
+tests, 97.1% measured coverage** (target 80%), independently double-confirmed by QA's static
+review (MCP was unavailable that pass — a server-side enrollment issue, not a shortcut) and
+the Director's own direct batchmode re-measurement. See
+`docs/Tasks/2026-08-01-step-6-juice-engine.md`. **This step is unusually feel-dependent — the
+mandatory human Play Mode pass has not happened yet**, more so than any prior step.
+
+**Next action:** a human Play Mode pass on `MovementTest.unity` (hit-stop freeze, camera
+shake, hit-flash, spark VFX — attack the training dummy to trigger all of it), then Director
+opens the Step 7 task brief (AI Architecture, Perception & Behavior) in strict 14-step order,
+carrying the same 80% coverage gate.

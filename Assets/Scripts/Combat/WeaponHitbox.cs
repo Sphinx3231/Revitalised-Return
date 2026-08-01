@@ -21,6 +21,14 @@ public sealed class WeaponHitbox : MonoBehaviour
 {
     [SerializeField] private float baseDamage = 10f;
 
+    /// <summary>
+    /// Optional pooled spark-VFX target (charter 6.3 + Step 6 Ruling 2 — a local, same-frame
+    /// direct call, not routed through EventBus, since point/normal aren't part of
+    /// EntityDamaged's shipped signature). Not required: a WeaponHitbox without one wired
+    /// still resolves hits correctly, it just skips the spark VFX call.
+    /// </summary>
+    [SerializeField] private SparkPool sparkPool;
+
     /// <summary>Assigned externally by AttackController before each hitbox opening.</summary>
     public StanceData CurrentStance { get; set; }
 
@@ -97,5 +105,19 @@ public sealed class WeaponHitbox : MonoBehaviour
         target.ApplyDamage(damage, false);
         target.ApplyPostureDamage(postureDamage);
         EventBus.RaiseEntityDamaged(target.DamageTransform, damage, false);
+
+        // Step 6 juice VFX (Ruling 2): approximate contact point/normal, direct calls (not
+        // via EventBus) to the spark pool and the struck target's own HitFlash, since this
+        // is a local same-frame call in the same object graph, not a cross-system broadcast.
+        Vector3 contactPoint = other.ClosestPoint(transform.position);
+        Vector3 normal = (target.DamageTransform.position - transform.position).normalized;
+        sparkPool?.Play(contactPoint, normal);
+
+        HitFlash hitFlash = other.GetComponent<HitFlash>();
+        if (hitFlash == null)
+        {
+            hitFlash = other.GetComponentInParent<HitFlash>();
+        }
+        hitFlash?.Flash();
     }
 }

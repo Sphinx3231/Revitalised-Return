@@ -6,7 +6,7 @@
 [Bb]uilds/
 [Ll]ogs/
 [Uu]serSettings/
-CoverageRun*/
+Coverage*/
 [Mm]emoryCaptures/
 *.pidb.meta
 *.pdb.meta

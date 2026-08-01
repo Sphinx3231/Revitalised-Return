@@ -277,4 +277,62 @@ public class WeaponHitboxTests
 
         Assert.AreEqual(10f, _targetDamageable.LastDamageAmount, 0.001f);
     }
+
+    // --- Step 6 juice VFX direct calls (Ruling 2) ---
+
+    [Test]
+    public void NormalHit_NoSparkPoolWired_DoesNotThrow()
+    {
+        // sparkPool defaults to null (unwired) -- a WeaponHitbox without one must still
+        // resolve the hit correctly.
+        Assert.DoesNotThrow(() => Trigger(_targetCollider));
+        Assert.AreEqual(1, _targetDamageable.ApplyDamageCallCount);
+    }
+
+    [Test]
+    public void NormalHit_WithSparkPoolWired_DoesNotThrow_AndStillAppliesDamage()
+    {
+        var sparkGo = new GameObject("SparkPool");
+        var sparkPool = sparkGo.AddComponent<SparkPool>();
+        TestReflectionUtil.SetField(_hitbox, "sparkPool", sparkPool);
+
+        Assert.DoesNotThrow(() => Trigger(_targetCollider));
+        Assert.AreEqual(1, _targetDamageable.ApplyDamageCallCount);
+
+        Object.DestroyImmediate(sparkGo);
+    }
+
+    [Test]
+    public void NormalHit_TargetHasHitFlash_CallsFlash()
+    {
+        _targetGo.AddComponent<MeshRenderer>();
+        var hitFlash = _targetGo.AddComponent<HitFlash>();
+        TestReflectionUtil.InvokeMethod(hitFlash, "Awake");
+
+        Trigger(_targetCollider);
+
+        Assert.AreEqual(1f, TestReflectionUtil.GetField<float>(hitFlash, "_intensity"), 0.0001f);
+    }
+
+    [Test]
+    public void NormalHit_TargetHasHitFlashOnParent_CallsFlash()
+    {
+        var childGo = new GameObject("Child", typeof(BoxCollider));
+        childGo.transform.SetParent(_targetGo.transform);
+        var childCollider = childGo.GetComponent<BoxCollider>();
+
+        _targetGo.AddComponent<MeshRenderer>();
+        var hitFlash = _targetGo.AddComponent<HitFlash>();
+        TestReflectionUtil.InvokeMethod(hitFlash, "Awake");
+
+        Trigger(childCollider);
+
+        Assert.AreEqual(1f, TestReflectionUtil.GetField<float>(hitFlash, "_intensity"), 0.0001f);
+    }
+
+    [Test]
+    public void NormalHit_TargetHasNoHitFlash_DoesNotThrow()
+    {
+        Assert.DoesNotThrow(() => Trigger(_targetCollider));
+    }
 }
