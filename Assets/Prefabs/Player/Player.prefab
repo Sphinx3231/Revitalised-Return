@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 1879014988041329061}
   - component: {fileID: 2521862672704261917}
   - component: {fileID: 988058055316486240}
+  - component: {fileID: 2546247712774986954}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -143,6 +144,7 @@ MonoBehaviour:
   stanceController: {fileID: 1879014988041329061}
   attackController: {fileID: 2521862672704261917}
   parryController: {fileID: 988058055316486240}
+  knockbackAbility: {fileID: 2546247712774986954}
 --- !u!114 &4283974548222327163
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -206,6 +208,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ParryController
   stanceController: {fileID: 1879014988041329061}
+--- !u!114 &2546247712774986954
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 827977809577014759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8ef4b6249dad1748a1bd8702863f0d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::KnockbackAbility
+  motor: {fileID: 6102237155468337713}
 --- !u!1 &3827821496710470783
 GameObject:
   m_ObjectHideFlags: 0

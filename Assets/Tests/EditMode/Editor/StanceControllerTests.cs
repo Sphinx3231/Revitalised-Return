@@ -147,4 +147,18 @@ public class StanceControllerTests
         TestReflectionUtil.SetField(_controller, "stances", new StanceData[0]);
         Assert.IsNull(_controller.CurrentStance);
     }
+
+    // Step 8: StanceController implements IStanceSource (zero behavior change, per
+    // Research/Approach) so AttackController can be reused unmodified on both the player and
+    // a boss. Verifies the interface cast is valid and reads through to the same CurrentStance.
+    [Test]
+    public void StanceController_ImplementsIStanceSource_CurrentStanceMatches()
+    {
+        TestReflectionUtil.SetField(_controller, "_currentIndex", 2);
+
+        IStanceSource source = _controller;
+
+        Assert.IsNotNull(source);
+        Assert.AreSame(_stances[2], source.CurrentStance);
+    }
 }

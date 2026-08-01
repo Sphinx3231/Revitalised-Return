@@ -15,17 +15,34 @@ using UnityEngine;
 public sealed class AttackController : MonoBehaviour
 {
     [SerializeField] private WeaponHitbox weaponHitbox;
-    [SerializeField] private StanceController stanceController;
+
+    /// <summary>
+    /// Serialized as MonoBehaviour rather than the concrete StanceController (Step 8 addendum
+    /// to the original DIP field-seam pattern): this component is reused unmodified on both
+    /// the player (StanceController) and a boss (BossStanceMirror) — two different concrete
+    /// MonoBehaviour types that both implement IStanceSource — so a StanceController-typed
+    /// field could not accept a BossStanceMirror reference in the Inspector. Cached to
+    /// _stanceSource in Awake(), same seam pattern PlayerRoot uses for its serialized
+    /// PlayerInputReader field vs. its private IMovementInput _movementInput.
+    /// </summary>
+    [SerializeField] private MonoBehaviour stanceController;
 
     [SerializeField] private float lightAttackWindowSeconds = 0.2f;
     [SerializeField] private float heavyAttackWindowSeconds = 0.35f;
     [SerializeField] private float lightAttackBaseDamage = 10f;
     [SerializeField] private float heavyAttackBaseDamage = 18f;
 
+    private IStanceSource _stanceSource;
+
     private bool _isAttacking;
     private float _windowRemaining;
 
     public bool IsAttacking => _isAttacking;
+
+    private void Awake()
+    {
+        _stanceSource = stanceController as IStanceSource;
+    }
 
     public void TryLightAttack()
     {
@@ -50,7 +67,7 @@ public sealed class AttackController : MonoBehaviour
 
         _isAttacking = true;
 
-        weaponHitbox.CurrentStance = stanceController != null ? stanceController.CurrentStance : null;
+        weaponHitbox.CurrentStance = _stanceSource != null ? _stanceSource.CurrentStance : null;
         weaponHitbox.BaseDamage = damage;
         weaponHitbox.ResetHitTracking();
         weaponHitbox.GetComponent<Collider>().enabled = true;

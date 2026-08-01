@@ -79,4 +79,12 @@ public class TrailActivatorTests
 
         Assert.DoesNotThrow(() => _activator.Tick(0.016f));
     }
+
+    // Step 8: exposed so BossPhaseController can tint the trail's colors for the Phase-2
+    // enrage visual cue without knowing anything about boss phases itself.
+    [Test]
+    public void TrailRenderer_ExposesWiredTrailRenderer()
+    {
+        Assert.AreSame(_trailRenderer, _activator.TrailRenderer);
+    }
 }

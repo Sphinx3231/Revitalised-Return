@@ -34,6 +34,11 @@ public class AttackControllerTests
 
         TestReflectionUtil.SetField(_attack, "weaponHitbox", _hitbox);
         TestReflectionUtil.SetField(_attack, "stanceController", _stanceController);
+
+        // Step 8: stanceController's field type widened to MonoBehaviour, cached to the
+        // private _stanceSource (IStanceSource) in Awake() -- must invoke Awake() after
+        // wiring the field so the cache picks up the test's StanceController instance.
+        TestReflectionUtil.InvokeMethod(_attack, "Awake");
     }
 
     [TearDown]

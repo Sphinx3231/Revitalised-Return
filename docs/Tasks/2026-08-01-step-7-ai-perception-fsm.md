@@ -250,3 +250,25 @@ wiring existed) — the checkpoint was accurate, no surprises.
   deserves to come before Steps 9-12's world/interaction/narrative work, or whether the
   charter's own strict ordering is still the right call given a boss needs an arena (Step 9
   territory) to mean anything.
+
+## Post-Signoff Bug Found During Step 8 Research (2026-08-01)
+- **Symptom, caught before any human noticed it:** Step 8's Research pass (which read
+  `EnemyBrain.cs` and grepped for its usage while investigating boss-encounter driving) found
+  that **nothing anywhere in the project calls `EnemyBrain.Tick()`** — no `Update()`, no
+  scene-level coordinator, no driver of any kind. Confirmed via grep: `Tick` on `EnemyBrain`
+  only appears inside `EnemyBrain.cs` itself and its own test file.
+- **Consequence:** the enemy built in this task is **completely inert in Play Mode** —
+  perception never runs, the FSM never advances, patrol/investigate/telegraph/attack never
+  happen. This is exactly the class of bug the mandatory human Play Mode pass (still pending
+  at the time this was found) exists to catch — it slipped through because that pass hadn't
+  happened yet, and QA's static code review correctly verified the FSM *logic* was correct
+  without being asked to verify anything actually *invokes* it at runtime.
+- **Root cause:** `PlayerRoot` is the established single-orchestrator pattern for the player
+  (explicit `Tick` calls in one `Update()`), but no equivalent `EnemyRoot`-style driver was
+  ever built for the enemy side — an oversight in this task's own implementation, not a design
+  flaw in the approach.
+- **Fix:** tracked as the first deliverable of
+  `docs/Tasks/2026-08-01-step-8-boss-mechanics.md` (an `EnemyRoot`/driver component, needed
+  regardless for Step 8's own boss-encounter testing) rather than a separate hotfix commit —
+  Step 8 cannot be manually verified at all without this fix existing first, so fixing it in
+  isolation and fixing it as part of Step 8 amount to the same work either way.

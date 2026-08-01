@@ -14,6 +14,14 @@ public sealed class TrailActivator : MonoBehaviour
     [SerializeField] private AttackController attackController;
 
     /// <summary>
+    /// Exposed (Step 8) so BossPhaseController can tint the trail's start/end colors for the
+    /// Phase-2 "enraged" visual cue (charter 8.2's flavor text, reusing this existing trail
+    /// per Research's finding rather than a new VFX asset) without this class needing to know
+    /// anything about boss phases itself.
+    /// </summary>
+    public TrailRenderer TrailRenderer => trailRenderer;
+
+    /// <summary>
     /// Syncs the wired TrailRenderer's emitting state to the wired AttackController's
     /// IsAttacking state. No-op if either reference is unwired.
     /// </summary>

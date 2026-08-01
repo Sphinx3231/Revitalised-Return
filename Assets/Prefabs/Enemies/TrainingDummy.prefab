@@ -88,6 +88,7 @@ GameObject:
   - component: {fileID: 1739922798940066174}
   - component: {fileID: 5474821404839640732}
   - component: {fileID: 2857999550370067480}
+  - component: {fileID: 8953577601068596864}
   m_Layer: 11
   m_Name: TrainingDummy
   m_TagString: Untagged
@@ -339,6 +340,22 @@ MonoBehaviour:
   heavyAttackWindowSeconds: 0.35
   lightAttackBaseDamage: 10
   heavyAttackBaseDamage: 18
+--- !u!114 &8953577601068596864
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3597144324002052116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f36b68b5e238ef4daba4dcb9f16d85d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyRoot
+  motor: {fileID: 6631284928103969020}
+  perception: {fileID: 1739922798940066174}
+  brain: {fileID: 5474821404839640732}
+  bossPhaseController: {fileID: 0}
 --- !u!1 &7284481603306067654
 GameObject:
   m_ObjectHideFlags: 0

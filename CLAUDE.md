@@ -892,10 +892,32 @@ by both QA and the Director directly. See `docs/Tasks/2026-08-01-step-7-ai-perce
 attempt to parry the enemy's attack — hasn't happened yet. This is the single most meaningful
 manual test remaining in the project so far.
 
-**Next action:** a human Play Mode pass on `MovementTest.unity` (does the enemy patrol,
-notice the player, investigate, telegraph, attack — and critically, does parrying its attack
-actually work), then Director opens the Step 8 task brief (Boss Mechanics) — though Research
-should confirm at that step's intake whether a full boss deserves to come before Steps 9-12's
-world/interaction/narrative work, since a boss needs an arena (Step 9 territory) to mean
-anything, rather than assuming the charter's strict numeric order is still the right call
-verbatim.
+**2026-08-01: a real bug was found in the already-committed Step 7 work** — while researching
+Step 8, nothing anywhere in the project was found to actually call `EnemyBrain.Tick()`, so the
+Step 7 enemy was completely inert in Play Mode (perception/FSM never ran). Fixed as Step 8's
+mandatory first deliverable (`Assets/Scripts/AI/EnemyRoot.cs`, mirroring `PlayerRoot`'s
+orchestrator role, wired onto both the base enemy and the boss), documented in both task
+files rather than silently folded in.
+
+**2026-08-01: Step 8 (Unity port) is done.** `BossPhaseController` implements charter 8.1's
+locked phase-transition order at the 50% HP crossing (invincibility window via `DummyHealth
+.IsInvincible`, AoE knockback reusing `DodgeAbility`'s exact `VelocityOverride` mechanism via
+a new `KnockbackAbility`, arena-barrier activation, stance-mirroring via a new `IStanceSource`
+interface — `StanceController`/`BossStanceMirror` both implement it, genuine Dependency
+Inversion). `BossCameraFraming` uses a `CinemachineTargetGroup` (not a second camera — composes
+with the existing `PlayerFollowCam` rig's trauma/noise/damping untouched) for the charter 8.2
+midpoint tracking; QA caught that boss-defeat never unsealed the arena or reverted the camera
+(both existed, unit-tested, but were never invoked) — fixed via a fix loop, not shipped with
+the gap. Arena barriers are explicit placeholders (a real arena is Step 9's job). **323 tests,
+96.4% measured coverage** (target 80%) — the Director's own re-run using the canonical,
+established `pathFilters` list superseded a lower self-reported number that traced to a
+`pathFilters` inconsistency in that specific re-run, not a real regression. See
+`docs/Tasks/2026-08-01-step-8-boss-mechanics.md`. **Steps 1-8 of the charter's 14-step roadmap
+are now functionally complete.**
+
+**Next action:** a human Play Mode pass covering both the Step 7 `EnemyRoot` fix (does the
+base enemy actually move/perceive/attack now?) and a full boss encounter (phase transition,
+invincibility, knockback, arena seal, camera reframe, unseal/camera-revert on defeat) — this
+is now the single largest backlog of unconfirmed manual verification in the project (Steps
+6/7/8 all still pending it). Then Director opens the Step 9 task brief (World Greybox) —
+also what finally gives Step 8's placeholder arena barriers a real level to belong to.

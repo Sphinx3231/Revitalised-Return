@@ -109,4 +109,79 @@ public class DummyHealthTests
     {
         Assert.AreSame(_dummy.transform, ((IDamageable)_dummy).DamageTransform);
     }
+
+    // Step 8 additions: HealthChanged event, HealthFraction, IsInvincible.
+
+    [Test]
+    public void ApplyDamage_FiresHealthChanged_WithCurrentAndMax()
+    {
+        LogAssert.Expect(LogType.Log, "Dummy took 30 damage, 70/100 HP remaining");
+
+        float gotCurrent = -1f;
+        float gotMax = -1f;
+        _dummy.HealthChanged += (current, max) => { gotCurrent = current; gotMax = max; };
+
+        ((IDamageable)_dummy).ApplyDamage(30f, false);
+
+        Assert.AreEqual(70f, gotCurrent);
+        Assert.AreEqual(100f, gotMax);
+    }
+
+    [Test]
+    public void ApplyDamage_NoSubscribers_DoesNotThrow()
+    {
+        LogAssert.Expect(LogType.Log, "Dummy took 10 damage, 90/100 HP remaining");
+        Assert.DoesNotThrow(() => ((IDamageable)_dummy).ApplyDamage(10f, false));
+    }
+
+    [Test]
+    public void HealthFraction_StartsAtOne()
+    {
+        Assert.AreEqual(1f, _dummy.HealthFraction, 0.0001f);
+    }
+
+    [Test]
+    public void HealthFraction_ReflectsDamageTaken()
+    {
+        LogAssert.Expect(LogType.Log, "Dummy took 25 damage, 75/100 HP remaining");
+        ((IDamageable)_dummy).ApplyDamage(25f, false);
+
+        Assert.AreEqual(0.75f, _dummy.HealthFraction, 0.0001f);
+    }
+
+    [Test]
+    public void IsInvincible_DefaultsFalse()
+    {
+        Assert.IsFalse(_dummy.IsInvincible);
+    }
+
+    [Test]
+    public void ApplyDamage_WhileInvincible_IsANoOp_NoLogNoEvent()
+    {
+        _dummy.IsInvincible = true;
+
+        bool eventFired = false;
+        _dummy.HealthChanged += (current, max) => eventFired = true;
+
+        ((IDamageable)_dummy).ApplyDamage(50f, false);
+
+        LogAssert.NoUnexpectedReceived();
+        Assert.IsFalse(eventFired);
+        float health = TestReflectionUtil.GetField<float>(_dummy, "_currentHealth");
+        Assert.AreEqual(100f, health);
+    }
+
+    [Test]
+    public void ApplyDamage_AfterInvincibilityCleared_DamagesNormally()
+    {
+        _dummy.IsInvincible = true;
+        ((IDamageable)_dummy).ApplyDamage(50f, false); // no-op, no log expected
+
+        _dummy.IsInvincible = false;
+        LogAssert.Expect(LogType.Log, "Dummy took 50 damage, 50/100 HP remaining");
+        ((IDamageable)_dummy).ApplyDamage(50f, false);
+
+        float health = TestReflectionUtil.GetField<float>(_dummy, "_currentHealth");
+        Assert.AreEqual(50f, health);
+    }
 }

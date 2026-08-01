@@ -5,7 +5,7 @@ using UnityEngine;
 /// split). Does not read input directly — PlayerRoot calls CycleNext()/CyclePrevious() in
 /// response to PlayerInputReader's unbuffered stance events. No Update() of its own.
 /// </summary>
-public sealed class StanceController : MonoBehaviour
+public sealed class StanceController : MonoBehaviour, IStanceSource
 {
     [SerializeField] private StanceData[] stances;
 

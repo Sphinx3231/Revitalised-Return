@@ -26,6 +26,7 @@ public sealed class PlayerRoot : MonoBehaviour
     [SerializeField] private StanceController stanceController;
     [SerializeField] private AttackController attackController;
     [SerializeField] private ParryController parryController;
+    [SerializeField] private KnockbackAbility knockbackAbility;
 
     /// <summary>
     /// Internal reads of raw movement input go through this interface (Dependency
@@ -99,6 +100,15 @@ public sealed class PlayerRoot : MonoBehaviour
         if (dodgeAbility != null)
         {
             dodgeAbility.TickDodge(deltaTime);
+        }
+
+        // 3b. Knockback tick (Step 8: externally triggered by BossPhaseController, not by
+        // player input — ticked here, after dodge and before the motor tick, so its
+        // VelocityOverride write (if active) is fresh for this frame's TickMotor call, same
+        // ordering reasoning as DodgeAbility's tick placement above).
+        if (knockbackAbility != null)
+        {
+            knockbackAbility.TickKnockback(deltaTime);
         }
 
         // 4. Motor tick (consumes VelocityOverride if set, else the lerped kinematics).
