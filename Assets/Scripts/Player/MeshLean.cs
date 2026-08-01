@@ -35,6 +35,14 @@ public sealed class MeshLean : MonoBehaviour
         if (motor == null || meshRoot == null)
             return;
 
+        // Guards against a divide-by-zero producing a NaN rotation: Step 6's hit-stop
+        // (HitStopCoordinator) sets Time.timeScale = 0f for a few frames, which makes the
+        // scaled Time.deltaTime PlayerRoot passes in become exactly 0. No time passing means
+        // nothing should visually change this frame anyway, so skip cleanly rather than
+        // divide by it.
+        if (deltaTime <= 0f)
+            return;
+
         Vector3 vel = motor.HorizontalVelocity;
         if (vel.sqrMagnitude < 0.0001f)
             return;
