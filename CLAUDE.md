@@ -824,6 +824,25 @@ would require restructuring `Assets/Scripts/` into its own `.asmdef`, deferred a
 rather than forced through as a side effect of a testing task). **This established a standing
 80%-coverage gate on every future step**, now logged in Section 6.
 
-**Next action:** Director opens a proper Step 5 task brief (Stance Engine, Hitbox Registration
-& Parry Logic, charter's full spec — not the cancelled ad-hoc slice breakdown) in strict
-14-step order, carrying the new 80% coverage gate as part of its own Definition of Done.
+**2026-08-01: Step 5 (Unity port, full spec) is done.** `WeaponHitbox.cs` implements charter
+5.2's full collision-resolution order (parry check → block check → hit check) — a parry fully
+skips the defender's damage and deals 40% posture to the attacker while interrupting their
+swing; a block reduces damage ×0.2 but leaves posture damage at full value (the explicit
+"bleed-through" rule); a normal hit uses the locked `Damage = (Base+Weapon) × (1−Armor/
+(Armor+100))` formula with stance multipliers. `StanceData`'s 4 assets now carry
+differentiated combat-tuning values. Self-hit prevention verified via a real Physics Layer
+collision matrix (`PlayerHitbox`/`PlayerHurtbox`/`EnemyHitbox`/`EnemyHurtbox`). A
+`TrainingDummy` prefab exists as a hittable target. `IsBlocking` is deliberately unwired to
+any input this task — a standing charter gap (no dedicated `block` action exists in the Input
+Actions asset) carried forward from this project's own Godot-era Step 5 precedent, not
+silently invented. **183 tests, 97% measured line coverage** (target 80%, standing gate),
+independently double-confirmed by both QA and the Director directly. See
+`docs/Tasks/2026-08-01-step-5-stances-hitboxes-parry.md`. **Logged scope boundary, not a
+hidden gap:** parry/block resolution against a live attacker cannot be manually Play-Mode-
+verified by a human until Step 7/8 delivers an actual enemy that can attack — proven instead
+via unit tests scrutinized specifically for this risk (genuinely-distinct attacker/defender
+mocks, not a shared mock that could mask a wrong-target bug).
+
+**Next action:** Director opens the Step 6 task brief (3D "Juice" Engine — hit-stop,
+camera trauma shake, hit-flash VFX, weapon arc trails) in strict 14-step order, carrying the
+same 80% coverage gate.

@@ -208,6 +208,71 @@ public class PlayerRootTests
         Object.DestroyImmediate(readerGo);
     }
 
+    // Step 5: exercises the new attack/parry buffered-consume + tick steps added to
+    // Update(), wiring real AttackController/ParryController components (not just the
+    // attackController==null/parryController==null false-branch the other Update tests
+    // above cover implicitly).
+    [Test]
+    public void Update_WithAttackAndParryControllersWired_ConsumesBufferedActionsAndTicks()
+    {
+        var camGo = new GameObject("Cam2");
+        var playerGo = new GameObject("Player2", typeof(CharacterController));
+        var readerGo = new GameObject("Reader2");
+        var hitboxGo = new GameObject("WeaponPivot2", typeof(BoxCollider));
+
+        var motor = playerGo.AddComponent<PlayerMotor>();
+        var vitals = playerGo.AddComponent<PlayerVitals>();
+        var dodge = playerGo.AddComponent<DodgeAbility>();
+        var reader = readerGo.AddComponent<PlayerInputReader>();
+        var attack = playerGo.AddComponent<AttackController>();
+        var parry = playerGo.AddComponent<ParryController>();
+        var hitbox = hitboxGo.AddComponent<WeaponHitbox>();
+        var fullRootGo = new GameObject("FullPlayerRoot2");
+        var fullRoot = fullRootGo.AddComponent<PlayerRoot>();
+
+        TestReflectionUtil.InvokeMethod(motor, "Awake");
+        TestReflectionUtil.InvokeMethod(vitals, "Awake");
+        TestReflectionUtil.InvokeMethod(dodge, "Awake");
+        TestReflectionUtil.InvokeMethod(reader, "Awake");
+        TestReflectionUtil.InvokeMethod(reader, "OnEnable");
+
+        TestReflectionUtil.SetField(attack, "weaponHitbox", hitbox);
+
+        TestReflectionUtil.SetField(fullRoot, "inputReader", reader);
+        TestReflectionUtil.SetField(fullRoot, "motor", motor);
+        TestReflectionUtil.SetField(fullRoot, "dodgeAbility", dodge);
+        TestReflectionUtil.SetField(fullRoot, "meshLean", null);
+        TestReflectionUtil.SetField(fullRoot, "cameraTransform", camGo.transform);
+        TestReflectionUtil.SetField(fullRoot, "vitals", vitals);
+        TestReflectionUtil.SetField(fullRoot, "stanceController", null);
+        TestReflectionUtil.SetField(fullRoot, "attackController", attack);
+        TestReflectionUtil.SetField(fullRoot, "parryController", parry);
+
+        TestReflectionUtil.InvokeMethod(fullRoot, "Awake");
+
+        // Buffer a light-attack and a parry action directly on the reader's InputBuffer,
+        // matching how PlayerInputReader's own callbacks push entries.
+        reader.InputBuffer.Push(InputBuffer.BufferedAction.LightAttack, Time.time);
+        reader.InputBuffer.Push(InputBuffer.BufferedAction.Parry, Time.time);
+
+        var previousState = GameState.CurrentState;
+        GameState.SetState(GameState.State.Playing);
+
+        Assert.DoesNotThrow(() => TestReflectionUtil.InvokeMethod(fullRoot, "Update"));
+
+        Assert.IsTrue(attack.IsAttacking, "Buffered LightAttack should have been consumed and triggered.");
+        Assert.IsTrue(parry.IsParrying, "Buffered Parry should have been consumed and triggered.");
+
+        GameState.SetState(previousState);
+        TestReflectionUtil.InvokeMethod(reader, "OnDisable");
+
+        Object.DestroyImmediate(camGo);
+        Object.DestroyImmediate(playerGo);
+        Object.DestroyImmediate(readerGo);
+        Object.DestroyImmediate(hitboxGo);
+        Object.DestroyImmediate(fullRootGo);
+    }
+
     [Test]
     public void OnDestroy_NullInputReader_DoesNotThrow()
     {

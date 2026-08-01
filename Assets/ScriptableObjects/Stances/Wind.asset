@@ -14,3 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StanceData
   stanceName: Wind
   icon: {fileID: 0}
+  baseDamageMultiplier: 0.95
+  postureDamageMultiplier: 1
+  attackSpeedScalar: 1.05
+  parryWindowDuration: 0.18

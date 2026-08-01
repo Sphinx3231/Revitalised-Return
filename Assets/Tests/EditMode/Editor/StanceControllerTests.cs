@@ -118,4 +118,33 @@ public class StanceControllerTests
         TestReflectionUtil.SetField(_controller, "stances", new StanceData[0]);
         Assert.DoesNotThrow(() => _controller.CyclePrevious());
     }
+
+    [Test]
+    public void CurrentStance_ReturnsStanceAtCurrentIndex()
+    {
+        TestReflectionUtil.SetField(_controller, "_currentIndex", 2);
+        Assert.AreSame(_stances[2], _controller.CurrentStance);
+    }
+
+    [Test]
+    public void CurrentStance_UpdatesAfterCycleNext()
+    {
+        TestReflectionUtil.SetField(_controller, "_currentIndex", 0);
+        _controller.CycleNext();
+        Assert.AreSame(_stances[1], _controller.CurrentStance);
+    }
+
+    [Test]
+    public void CurrentStance_NullArray_ReturnsNull()
+    {
+        TestReflectionUtil.SetField(_controller, "stances", null);
+        Assert.IsNull(_controller.CurrentStance);
+    }
+
+    [Test]
+    public void CurrentStance_EmptyArray_ReturnsNull()
+    {
+        TestReflectionUtil.SetField(_controller, "stances", new StanceData[0]);
+        Assert.IsNull(_controller.CurrentStance);
+    }
 }

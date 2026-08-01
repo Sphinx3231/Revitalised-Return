@@ -164,4 +164,70 @@ public class PlayerVitalsTests
 
         Assert.IsFalse(firedAgain);
     }
+
+    // IDamageable tests (Step 5).
+
+    [Test]
+    public void ApplyDamage_DeductsHealthAndFiresEvent()
+    {
+        float gotCurrent = -1, gotMax = -1;
+        System.Action<float, float> onHealth = (c, m) => { gotCurrent = c; gotMax = m; };
+        EventBus.PlayerHealthChanged += onHealth;
+
+        ((IDamageable)_vitals).ApplyDamage(30f, false);
+
+        EventBus.PlayerHealthChanged -= onHealth;
+
+        Assert.AreEqual(70f, gotCurrent);
+        Assert.AreEqual(100f, gotMax);
+    }
+
+    [Test]
+    public void ApplyDamage_ClampsAtZero()
+    {
+        float gotCurrent = -1;
+        System.Action<float, float> onHealth = (c, m) => gotCurrent = c;
+        EventBus.PlayerHealthChanged += onHealth;
+
+        ((IDamageable)_vitals).ApplyDamage(500f, false);
+
+        EventBus.PlayerHealthChanged -= onHealth;
+
+        Assert.AreEqual(0f, gotCurrent);
+    }
+
+    [Test]
+    public void ApplyPostureDamage_DeductsPostureAndFiresEvent()
+    {
+        float gotCurrent = -1, gotMax = -1;
+        System.Action<float, float> onPosture = (c, m) => { gotCurrent = c; gotMax = m; };
+        EventBus.PlayerPostureChanged += onPosture;
+
+        ((IDamageable)_vitals).ApplyPostureDamage(40f);
+
+        EventBus.PlayerPostureChanged -= onPosture;
+
+        Assert.AreEqual(60f, gotCurrent);
+        Assert.AreEqual(100f, gotMax);
+    }
+
+    [Test]
+    public void ApplyPostureDamage_ClampsAtZero()
+    {
+        float gotCurrent = -1;
+        System.Action<float, float> onPosture = (c, m) => gotCurrent = c;
+        EventBus.PlayerPostureChanged += onPosture;
+
+        ((IDamageable)_vitals).ApplyPostureDamage(500f);
+
+        EventBus.PlayerPostureChanged -= onPosture;
+
+        Assert.AreEqual(0f, gotCurrent);
+    }
+
+    [Test]
+    public void DamageTransform_ReturnsOwnTransform()
+    {
+        Assert.AreSame(_vitals.transform, ((IDamageable)_vitals).DamageTransform);
+    }
 }

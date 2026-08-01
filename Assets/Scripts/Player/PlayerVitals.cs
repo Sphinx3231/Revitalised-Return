@@ -4,10 +4,11 @@ using UnityEngine;
 /// Single-responsibility owner of the player's health/stamina/posture state (charter
 /// S.O.L.I.D. split). Fires the EventBus vitals events the Phase 2 HUD already subscribes
 /// to. Does NOT implement its own Update() — PlayerRoot calls TickRegen(deltaTime)
-/// explicitly, per its documented single-orchestrator tick order. Health/posture have no
-/// drain source yet this slice, so only stamina regenerates.
+/// explicitly, per its documented single-orchestrator tick order. Also implements
+/// IDamageable (Step 5) so WeaponHitbox can resolve hits against the player without any
+/// player-specific special-casing.
 /// </summary>
-public sealed class PlayerVitals : MonoBehaviour, IStaminaSource
+public sealed class PlayerVitals : MonoBehaviour, IStaminaSource, IDamageable
 {
     private const float StaminaRegenRate = 10.0f;
     private const float StaminaRegenPause = 1.2f;
@@ -69,4 +70,20 @@ public sealed class PlayerVitals : MonoBehaviour, IStaminaSource
             EventBus.RaisePlayerStaminaChanged(_currentStamina, maxStamina);
         }
     }
+
+    // IDamageable implementation (Step 5).
+
+    public void ApplyDamage(float amount, bool isCritical)
+    {
+        _currentHealth = Mathf.Max(0f, _currentHealth - amount);
+        EventBus.RaisePlayerHealthChanged(_currentHealth, maxHealth);
+    }
+
+    public void ApplyPostureDamage(float amount)
+    {
+        _currentPosture = Mathf.Max(0f, _currentPosture - amount);
+        EventBus.RaisePlayerPostureChanged(_currentPosture, maxPosture);
+    }
+
+    public Transform DamageTransform => transform;
 }

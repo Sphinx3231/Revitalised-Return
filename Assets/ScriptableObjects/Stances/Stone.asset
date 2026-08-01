@@ -14,3 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StanceData
   stanceName: Stone
   icon: {fileID: 0}
+  baseDamageMultiplier: 1.2
+  postureDamageMultiplier: 1.8
+  attackSpeedScalar: 0.85
+  parryWindowDuration: 0.12

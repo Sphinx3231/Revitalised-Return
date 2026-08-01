@@ -11,6 +11,9 @@ public sealed class StanceController : MonoBehaviour
 
     private int _currentIndex = 0;
 
+    /// <summary>The currently active stance, or null if no stances are configured.</summary>
+    public StanceData CurrentStance => stances != null && stances.Length > 0 ? stances[_currentIndex] : null;
+
     public void CycleNext()
     {
         if (stances == null || stances.Length == 0)
