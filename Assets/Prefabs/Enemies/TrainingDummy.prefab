@@ -1,5 +1,73 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1470305675023038025
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5449056894436660970}
+  - component: {fileID: 5868810619291884962}
+  - component: {fileID: 1774579473678715239}
+  m_Layer: 10
+  m_Name: WeaponHitbox
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5449056894436660970
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1470305675023038025}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3375982611592203886}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &5868810619291884962
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1470305675023038025}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 0.5, y: 0.5, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1774579473678715239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1470305675023038025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a31af69ded1ff7f44aaf6eeeaa29d7c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponHitbox
+  baseDamage: 10
+  sparkPool: {fileID: 0}
 --- !u!1 &3597144324002052116
 GameObject:
   m_ObjectHideFlags: 0
@@ -39,7 +107,9 @@ Transform:
   m_LocalPosition: {x: 0, y: 1, z: 3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 5449056894436660970}
+  - {fileID: 2449633967508406305}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &478061741057541766
@@ -227,10 +297,10 @@ MonoBehaviour:
   visionRange: 18
   visionHalfAngleDegrees: 45
   soundRadius: 8
-  eyePoint: {fileID: 0}
+  eyePoint: {fileID: 2449633967508406305}
   obstructionMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1
   playerTransform: {fileID: 0}
   playerDodgeAbility: {fileID: 0}
   playerAttackController: {fileID: 0}
@@ -247,9 +317,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyBrain
   waypoints: []
-  motor: {fileID: 0}
-  perception: {fileID: 0}
-  attackController: {fileID: 0}
+  motor: {fileID: 6631284928103969020}
+  perception: {fileID: 1739922798940066174}
+  attackController: {fileID: 2857999550370067480}
   playerTransform: {fileID: 0}
 --- !u!114 &2857999550370067480
 MonoBehaviour:
@@ -263,9 +333,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df59e2a4999e8f946862770729f08a0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackController
-  weaponHitbox: {fileID: 0}
+  weaponHitbox: {fileID: 1774579473678715239}
   stanceController: {fileID: 0}
   lightAttackWindowSeconds: 0.2
   heavyAttackWindowSeconds: 0.35
   lightAttackBaseDamage: 10
   heavyAttackBaseDamage: 18
+--- !u!1 &7284481603306067654
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2449633967508406305}
+  m_Layer: 0
+  m_Name: EyePoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2449633967508406305
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7284481603306067654}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.7, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3375982611592203886}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

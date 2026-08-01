@@ -865,22 +865,37 @@ shake, hit-flash, spark VFX — attack the training dummy to trigger all of it),
 opens the Step 7 task brief (AI Architecture, Perception & Behavior) in strict 14-step order,
 carrying the same 80% coverage gate.
 
-**2026-08-01: Step 7 (AI Architecture, Perception & Behavior) is IN PROGRESS, not done.**
-Research and Approach are fully signed off (see
-`docs/Tasks/2026-08-01-step-7-ai-perception-fsm.md`) — plain `Transform[]` waypoints + a
-`PlayerMotor`-mirrored `EnemyMotor`, an enum+switch `EnemyBrain` FSM matching `GameState.cs`'s
-house style, `AttackController`/`WeaponHitbox` reused unmodified on the enemy side (load-
-bearing for the Step-5-flagged parry-vs-live-attacker gap this step exists to close). A real
-live-verified finding worth remembering for any future physics-query work:
-**`Physics.autoSyncTransforms` is `false` in EditMode** — a raycast/`OverlapSphere` against a
-just-moved transform silently returns false/empty unless `Physics.SyncTransforms()` is called
-first, and `Physics.queriesHitTriggers` defaults `true` so LOS raycasts need
-`QueryTriggerInteraction.Ignore` or trigger hurtboxes falsely block sight. **Implementation
-Attempt 1 was cut off mid-task by a session limit** (not a design/code failure) — `EnemyMotor
-.cs`/`EnemyPerception.cs`/`EnemyBrain.cs` exist and compile clean, `TrainingDummy.prefab` has
-all intended components attached, but **zero scene-level wiring, zero tests, zero
-verification** happened. Committed as an explicit WIP checkpoint, not signed off. **Next
-action:** resume Implementation from where it left off (finish the enemy's `WeaponHitbox`
-child + `CharacterController` tuning, wire `MovementTest.unity`'s cross-references, write
-`EnemyPerception`'s tests with the `SyncTransforms`/`QueryTriggerInteraction` fixes applied,
-measure coverage), then QA, then Director sign-off.
+**2026-08-01: Step 7 (AI Architecture, Perception & Behavior) is done.** (Implementation
+Attempt 1 was cut off mid-task by a session limit — committed as an explicit WIP checkpoint,
+then resumed and completed in Attempt 2 the same day, with the checkpoint's claims
+independently re-verified before continuing, not trusted blindly.) `EnemyPerception.cs`
+implements the vision cone (45° half-angle, 18m range, 0.1s tick with the charter-14
+`_perceptionOffset` stagger) and acoustic detection (8m sphere, dodge+attack as the noise
+triggers — no sprint mechanic exists yet, logged gap, not invented). A real, live-verified
+finding worth remembering for any future physics-query work: **`Physics.autoSyncTransforms`
+is `false` in EditMode** — a raycast/`OverlapSphere` against a just-moved transform silently
+returns false/empty unless `Physics.SyncTransforms()` is called first, and
+`Physics.queriesHitTriggers` defaults `true` so LOS raycasts need
+`QueryTriggerInteraction.Ignore` or trigger hurtboxes falsely block sight — both fixes are in
+`EnemyPerception.cs` and specifically proven by dedicated tests. `EnemyBrain.cs` implements
+the full charter 7.2 FSM (enum+switch, matching `GameState.cs`'s house style — a full
+per-state-class pattern was explicitly rejected as over-engineering for a closed 5-state
+graph with one enemy type): `Patrol`→`Investigate`→`Telegraph`→`Attack`→`Recovery`→back to
+`Investigate` (not directly to `Attack` — the charter's own non-obvious edge, confirmed
+correct). The enemy reuses Step 5's `AttackController`/`WeaponHitbox` **completely
+unmodified** — this is load-bearing, not just convenient: it means the player's parry/block
+resolution (interrupt, posture damage, `ParryExecuted`) now works against a real opponent for
+the first time, finally closing the scope boundary Step 5 explicitly logged at its own
+sign-off. **272 tests, 97% measured coverage** (target 80%), independently double-confirmed
+by both QA and the Director directly. See `docs/Tasks/2026-08-01-step-7-ai-perception-fsm.md`.
+**Known, still-open item:** the mandatory human Play Mode pass — specifically including an
+attempt to parry the enemy's attack — hasn't happened yet. This is the single most meaningful
+manual test remaining in the project so far.
+
+**Next action:** a human Play Mode pass on `MovementTest.unity` (does the enemy patrol,
+notice the player, investigate, telegraph, attack — and critically, does parrying its attack
+actually work), then Director opens the Step 8 task brief (Boss Mechanics) — though Research
+should confirm at that step's intake whether a full boss deserves to come before Steps 9-12's
+world/interaction/narrative work, since a boss needs an arena (Step 9 territory) to mean
+anything, rather than assuming the charter's strict numeric order is still the right call
+verbatim.

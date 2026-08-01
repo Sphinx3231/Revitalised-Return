@@ -172,16 +172,81 @@ agent's own claims). This is being committed as an explicit, labeled WIP checkpo
 this project's own established precedent (`9341ed2`: "WIP: pause UI/systems skeleton task —
 blocked on Input System package") — not as a completed step.
 
+### Attempt 2 (resumed) — COMPLETE
+Resumed in a fresh session, per the Attempt-1 checkpoint notes above. Verified every checkpoint
+claim independently before proceeding (read all 3 AI scripts in full, confirmed the prefab's
+6 components were attached but every cross-reference was `fileID: 0`, confirmed zero scene
+wiring existed) — the checkpoint was accurate, no surprises.
+- Finished enemy prefab wiring: `WeaponHitbox` child added (layer `EnemyHitbox`=10, mirroring
+  `Player.prefab`'s `WeaponPivot`), `EyePoint` child, all cross-references wired
+  (`AttackController.weaponHitbox`, `EnemyBrain`'s 3 component refs, `EnemyPerception
+  .eyePoint`/`obstructionMask`). `CharacterController` dimensions already matched the capsule
+  mesh from Attempt 1, no change needed.
+- Finished scene wiring: `Waypoint_A`/`Waypoint_B` created, `EnemyBrain.waypoints`/
+  `playerTransform`, `EnemyPerception.playerTransform`/`playerDodgeAbility`/
+  `playerAttackController` all wired to the real `Player` GameObject's actual components.
+- Wrote all 51 remaining tests (`EnemyMotorTests`, `EnemyPerceptionTests` — the highest-value
+  file, specifically proving the `Physics.SyncTransforms()`/`QueryTriggerInteraction.Ignore`
+  fixes matter via matched solid-vs-trigger-obstruction test pairs — `EnemyBrainTests`,
+  covering every charter-mandated state transition including `Recovery→Investigate`, not
+  `Recovery→Attack`).
+- **Measured: 272/272 tests passing, 97% whole-project coverage** (592/610), AI-scoped
+  per-file: `EnemyBrain` 96.5%, `EnemyMotor` 94.1%, `EnemyPerception` 97.8%.
+- One real MCP tool quirk discovered and worked around (not a project bug): `jsonPatch` on a
+  top-level `Transform`-typed serialized field silently no-ops; `componentDiff` works
+  correctly for the same field — noted for future sessions to save re-discovery time.
+
 ## QA Iterations (QA/Test Agent)
-Not started — nothing to QA yet given Implementation didn't reach a testable state.
+### Attempt 1
+- **Method:** independently re-read `EnemyPerception.cs`/`EnemyBrain.cs` in full against the
+  exact charter 7.1/7.2 spec and the two locked Research findings, specifically reasoning
+  through *when* `Physics.SyncTransforms()` needs to be called (not just checking for its
+  presence) — confirmed it's called unconditionally before the LOS raycast, correctly
+  covering both this-frame enemy movement and the player's movement from its own separate
+  Update chain since the last sync. Independently re-verified the vision-cone comparison
+  direction (`dot < cosHalfAngle → reject`, not inverted). Independently cross-referenced
+  every new wired fileID in both `TrainingDummy.prefab` and `MovementTest.unity` against the
+  real Player prefab's own component fileIDs (not just "non-zero", actually resolved to the
+  correct target). Read `EnemyPerceptionTests.cs` in full to confirm the
+  obstruction/trigger-ignore tests would genuinely fail if the fixes were removed (constructs
+  a real blocking scenario, not a tautology).
+- **Result: PASS on every directly-verifiable claim** (compile, both new scripts' correctness,
+  state-machine fidelity to the charter diagram including the `Recovery→Investigate`
+  non-obvious edge, live wiring on both prefab and scene, test quality/genuineness).
+  `tests-run` independently reproduced 272/272 passing, matching self-report. **Coverage
+  percentage correctly deferred, not fabricated** — QA judged running a second batchmode
+  process against a project the live Editor already had open as a lock/license-conflict risk
+  not worth taking, consistent with this session's established practice of the Director
+  closing that specific gap directly rather than QA guessing at it.
+- **Director closed the gap directly:** closed the interactive Editor, independently ran the
+  verified batchmode CLI, and reproduced **97% line coverage (592/610), 272/272 tests
+  passing** — exact match to Implementation's self-report on every number, including all 3
+  per-file breakdowns.
 
 ## Director Final Review
-**Not signed off. Step 7 remains open.** Next session should resume Implementation from where
-it left off: finish wiring `AttackController`'s `WeaponHitbox` child on the enemy (layer
-`EnemyHitbox`), tune `CharacterController` dimensions, wire the scene-level cross-references
-(`playerTransform`, `waypoints`, noise-source components) on the `MovementTest.unity` instance,
-write the EditMode tests (especially `EnemyPerception`'s — the Research-flagged
-`Physics.SyncTransforms()`/`QueryTriggerInteraction.Ignore` correctness requirements are the
-highest-risk untested logic right now), measure real coverage, then route through QA. The
-Research Findings and Approach & Tradeoffs sections above remain valid and fully approved —
-only Implementation needs to resume, not re-litigation of the design.
+- This step carried real correctness stakes similar to Step 5's parry logic: perception
+  correctness determines whether the enemy behaves at all, and the `SyncTransforms`/
+  `QueryTriggerInteraction.Ignore` fixes are the kind of bug that would silently produce "the
+  enemy never notices the player" rather than a loud failure. QA's specific reasoning-through
+  of *when* the sync matters (not just grep-checking for the API call) was the right level of
+  scrutiny, and it held up.
+- S.O.L.I.D. holds: `EnemyMotor`/`EnemyPerception`/`EnemyBrain` are 3 independent concerns,
+  `EnemyBrain` orchestrates without owning perception or movement logic itself.
+  `AttackController`/`WeaponHitbox` reused genuinely unmodified — confirmed by QA's fileID
+  cross-reference showing the enemy's hitbox correctly participates in the same parry/block/
+  hit resolution the player already exercises, which is what makes this step close Step 5's
+  logged gap rather than just add enemy behavior in isolation.
+- The resumed-session handoff worked cleanly: Attempt 2's own independent re-verification of
+  Attempt 1's checkpoint claims (rather than trusting them blindly) is exactly the discipline
+  this pipeline is supposed to enforce at every handoff, not just between Director and agents.
+- **Known, still-open item:** the mandatory human Play Mode pass — specifically including an
+  attempt to parry the enemy's attack — has not happened yet. This is the single most
+  meaningful manual test remaining in the whole project so far, since it's the first time any
+  of Step 5's combat resolution can be exercised against a live opponent.
+- **Sign-off: Step 7 (Unity port) complete**, pending the mandatory human Play Mode
+  confirmation. 97% measured coverage (target 80%), 272/272 tests passing, independently
+  double-confirmed by both QA and the Director. Next in strict 14-step order: Step 8 (Boss
+  Mechanics) — though Research should confirm at that step's intake whether a full boss
+  deserves to come before Steps 9-12's world/interaction/narrative work, or whether the
+  charter's own strict ordering is still the right call given a boss needs an arena (Step 9
+  territory) to mean anything.
