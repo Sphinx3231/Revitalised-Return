@@ -915,9 +915,33 @@ established `pathFilters` list superseded a lower self-reported number that trac
 `docs/Tasks/2026-08-01-step-8-boss-mechanics.md`. **Steps 1-8 of the charter's 14-step roadmap
 are now functionally complete.**
 
-**Next action:** a human Play Mode pass covering both the Step 7 `EnemyRoot` fix (does the
-base enemy actually move/perceive/attack now?) and a full boss encounter (phase transition,
-invincibility, knockback, arena seal, camera reframe, unseal/camera-revert on defeat) — this
-is now the single largest backlog of unconfirmed manual verification in the project (Steps
-6/7/8 all still pending it). Then Director opens the Step 9 task brief (World Greybox) —
-also what finally gives Step 8's placeholder arena barriers a real level to belong to.
+**2026-08-01: a real bug was caught via manual Play Mode testing** (the first payoff of the
+user actually playing the build) — `MeshLean` divided by `Time.deltaTime` unguarded, and Step
+6's hit-stop setting `Time.timeScale = 0f` made that `deltaTime` exactly `0` for a few frames,
+producing a NaN mesh rotation. Fixed with an early-return guard (`deltaTime <= 0f`) plus a
+regression test — see commit `e0f967f`. This is exactly the class of cross-system bug unit
+tests alone don't catch, and why the mandatory Play Mode pass matters.
+
+**2026-08-01: Step 9 (Unity port) is done.** `RegionGraph`/`RegionNode`/`RegionEdge`
+(`Assets/Scripts/World/`) implement charter 9's data model — `RegionGraph` is a
+`ScriptableObject` (matching `StanceData`'s authoring precedent), `RegionGraphValidator`
+checks the locked shrine-spacing convention (every boss needs a nearby shrine, every entrance
+needs one too). A real `Assets/ScriptableObjects/Regions/Prologue.asset` and a real
+greyboxed `Assets/Scenes/Levels/Prologue.unity` exist — 10 ProBuilder-authored pieces, each
+with an explicit `MeshCollider` (ProBuilder doesn't add one automatically) and correct
+occlusion-culling flags, independently verified. **Explicit scope boundary:** only the
+Prologue is greyboxed this task, not all 5 acts — mirrors every prior step's own proof-of-
+mechanism discipline (Step 5 proved combat against one dummy, Step 7 proved AI against one
+enemy). The `Boss` prefab is placed in a real (if simple) arena; a known, self-flagged gap
+(`BossPhaseController.playerTransform`/`playerKnockback` unwired in this specific scene) was
+independently re-assessed by QA and judged acceptable — it doesn't undermine this task's DoD,
+which only requires the boss be *placed* in a real arena, not that Step 8's full combat loop
+be re-proven in a second scene (already covered by `MovementTest.unity`'s regression rig).
+**335 tests, 96.6% measured coverage** (target 80%), independently double-confirmed. See
+`docs/Tasks/2026-08-01-step-9-world-greybox.md`.
+
+**Next action:** a human Play Mode pass — this backlog now spans Steps 6/7/8 (mechanical
+correctness) and Step 9 (visual/pacing: does the greybox read clearly, is the shrine
+reachable, does the arena feel right). Then Director opens the Step 10 task brief
+(Interactive Objects, Inventory Data & Gathering Economy) — which also finally gives Step 9's
+inert Shrine/GraveMarker placeholders real interaction behavior.

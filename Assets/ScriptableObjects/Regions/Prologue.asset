@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d313bf5c4e42894c9efc039af013eb0, type: 3}
+  m_Name: Prologue
+  m_EditorClassIdentifier: Assembly-CSharp::RegionGraph
+  regionId: prologue
+  skylineAnchor: Sekigahara Ruins
+  nodes:
+  - id: entrance
+    kind: 0
+    worldPosition: {x: 0, y: 0, z: 0}
+    displayName: Region Entrance
+  - id: shrine
+    kind: 1
+    worldPosition: {x: 3, y: 0, z: 2}
+    displayName: Rest Shrine
+  - id: boss
+    kind: 8
+    worldPosition: {x: 0, y: 0, z: 30}
+    displayName: Captain Renzo
+  edges:
+  - fromId: entrance
+    toId: shrine
+  - fromId: shrine
+    toId: boss
+  criticalPath:
+  - entrance
+  - shrine
+  - boss
