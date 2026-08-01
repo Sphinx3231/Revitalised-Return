@@ -15,6 +15,11 @@ GameObject:
   - component: {fileID: 514608991304102388}
   - component: {fileID: 687165066839115183}
   - component: {fileID: 6663799491912113957}
+  - component: {fileID: 2234599913621078004}
+  - component: {fileID: 6631284928103969020}
+  - component: {fileID: 1739922798940066174}
+  - component: {fileID: 5474821404839640732}
+  - component: {fileID: 2857999550370067480}
   m_Layer: 11
   m_Name: TrainingDummy
   m_TagString: Untagged
@@ -169,3 +174,98 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4271df098e3af142a803ef2d82725c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HitFlash
+--- !u!143 &2234599913621078004
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3597144324002052116}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 2
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &6631284928103969020
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3597144324002052116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86ac05a5169417e4fa8573f1f25b0479, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyMotor
+  SpeedScale: 1
+--- !u!114 &1739922798940066174
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3597144324002052116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df2bbe6ecb753c04a98799a91dc5df5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyPerception
+  visionRange: 18
+  visionHalfAngleDegrees: 45
+  soundRadius: 8
+  eyePoint: {fileID: 0}
+  obstructionMask:
+    serializedVersion: 2
+    m_Bits: 0
+  playerTransform: {fileID: 0}
+  playerDodgeAbility: {fileID: 0}
+  playerAttackController: {fileID: 0}
+--- !u!114 &5474821404839640732
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3597144324002052116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f919374f6c73fb2499a5e8d75ecc9cc3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyBrain
+  waypoints: []
+  motor: {fileID: 0}
+  perception: {fileID: 0}
+  attackController: {fileID: 0}
+  playerTransform: {fileID: 0}
+--- !u!114 &2857999550370067480
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3597144324002052116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df59e2a4999e8f946862770729f08a0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AttackController
+  weaponHitbox: {fileID: 0}
+  stanceController: {fileID: 0}
+  lightAttackWindowSeconds: 0.2
+  heavyAttackWindowSeconds: 0.35
+  lightAttackBaseDamage: 10
+  heavyAttackBaseDamage: 18

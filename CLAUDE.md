@@ -864,3 +864,23 @@ mandatory human Play Mode pass has not happened yet**, more so than any prior st
 shake, hit-flash, spark VFX — attack the training dummy to trigger all of it), then Director
 opens the Step 7 task brief (AI Architecture, Perception & Behavior) in strict 14-step order,
 carrying the same 80% coverage gate.
+
+**2026-08-01: Step 7 (AI Architecture, Perception & Behavior) is IN PROGRESS, not done.**
+Research and Approach are fully signed off (see
+`docs/Tasks/2026-08-01-step-7-ai-perception-fsm.md`) — plain `Transform[]` waypoints + a
+`PlayerMotor`-mirrored `EnemyMotor`, an enum+switch `EnemyBrain` FSM matching `GameState.cs`'s
+house style, `AttackController`/`WeaponHitbox` reused unmodified on the enemy side (load-
+bearing for the Step-5-flagged parry-vs-live-attacker gap this step exists to close). A real
+live-verified finding worth remembering for any future physics-query work:
+**`Physics.autoSyncTransforms` is `false` in EditMode** — a raycast/`OverlapSphere` against a
+just-moved transform silently returns false/empty unless `Physics.SyncTransforms()` is called
+first, and `Physics.queriesHitTriggers` defaults `true` so LOS raycasts need
+`QueryTriggerInteraction.Ignore` or trigger hurtboxes falsely block sight. **Implementation
+Attempt 1 was cut off mid-task by a session limit** (not a design/code failure) — `EnemyMotor
+.cs`/`EnemyPerception.cs`/`EnemyBrain.cs` exist and compile clean, `TrainingDummy.prefab` has
+all intended components attached, but **zero scene-level wiring, zero tests, zero
+verification** happened. Committed as an explicit WIP checkpoint, not signed off. **Next
+action:** resume Implementation from where it left off (finish the enemy's `WeaponHitbox`
+child + `CharacterController` tuning, wire `MovementTest.unity`'s cross-references, write
+`EnemyPerception`'s tests with the `SyncTransforms`/`QueryTriggerInteraction` fixes applied,
+measure coverage), then QA, then Director sign-off.
