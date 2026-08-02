@@ -973,5 +973,37 @@ Director-verified (scene/prefab wiring, script review, SOLID). See
 has no Play Mode control or Game View screenshot access, so no pipeline agent could perform it;
 same standing gap as Steps 6/7/8/9 above.
 
-**Next action:** a human Play Mode pass covering both the new first-person camera/weapon feel
-*and* the Steps 6/7/8/9 backlog above, then Director opens the Step 10 task brief.
+**2026-08-02: Step 10 (Interactive Objects, Inventory Data & Gathering Economy) is done.**
+`ItemData`/`ItemStack`/`Inventory` (plain C# data model, not `ScriptableObject` for the latter
+two — matches charter's locked structure), `Interactable` abstract base +
+`Shrine`/`Chest`/`HarvestNode` subclasses, `InteractionResolver` (the locked `0.7×camera-dot +
+0.3×proximity` ranking formula, a manual `Physics.OverlapSphereNonAlloc` scan mirroring Step
+7's `EnemyPerception` pattern, `Physics.SyncTransforms()` + `QueryTriggerInteraction.Collide`).
+A new Physics Layer 12 (`Interactable`) was registered; `interact` was promoted to a buffered
+action (`InputBuffer.BufferedAction.Interact`), a logged Step 3.2 amendment since the charter's
+original buffered-action list didn't include it. **Real process gap caught mid-cycle:** this
+code was written in an earlier session but committed without ever reaching QA or Director
+review — the task file's QA/Implementation-Summary/Director sections were still blank when
+found. Director caught this and routed a proper QA pass, which found the code itself correct
+but the feature entirely inert: `PlayerRoot.interactionResolver` was a null reference on
+`Player.prefab` (the same bug class as the earlier inert-`EnemyBrain.Tick()` issue), no
+`Shrine`/`Chest`/`HarvestNode` existed in `Prologue.unity`, no `ItemData` assets existed, and
+there was zero test coverage on any of the 9 new Interaction-layer scripts. A fix loop closed
+all of it — prefab/scene wiring, `TamahaganeOre`/`AshrootSprig` `ItemData` assets under
+`Assets/ScriptableObjects/Items/`, and 50 new tests (401/401 passing, 0 regressions from the
+351 baseline) — independently re-verified by a second QA pass via raw GUID cross-checks and a
+live test re-run, not a re-read of the implementer's summary. Director's own spot-check of
+`Chest.cs`/`InteractionResolver.cs`/`Inventory.cs` found clean S.O.L.I.D. separation (resolver
+only ranks/selects, never invokes `Interact()` itself — `PlayerRoot` owns the single
+consume-and-act call site) and documented edge-case handling (overflow-drop policy, degenerate
+zero-distance scoring, double-loot guards). See
+`docs/Tasks/2026-08-01-step-10-interactions-inventory.md` for the full record, including this
+process-gap lesson. **Standing gap, not new:** the mandatory human Play Mode pass is still
+outstanding, same as Steps 6-9 and the FPS pivot — no agent in this session has Play Mode/Game
+View control.
+
+**Next action:** a human Play Mode pass covering the new first-person camera/weapon feel, the
+Steps 6/7/8/9 backlog, and now Step 10's interaction loop (approach the shrine/chest/harvest
+node in `Prologue.unity`, confirm candidate ranking picks the right target and interacting
+grants the item / shows the notice). Then Director opens the Step 11 task brief (Reactive HUD,
+UI Systems & Persistence Engine) in strict 14-step order.

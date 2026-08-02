@@ -102,6 +102,51 @@ public class InputBufferTests
         Assert.IsTrue(buffer.TryConsume(InputBuffer.BufferedAction.Parry, 0.01f));
     }
 
+    // Step 10 / Step 3.2 amendment: `interact` is now a buffered action, same double-fire
+    // prevention structurally via TryConsume as the other four -- same round-trip pattern as
+    // PushThenTryConsume_BasicRoundTrip_Succeeds above, plus a same-buffer-doesn't-clash check
+    // against the pre-existing four actions.
+    [Test]
+    public void PushThenTryConsume_Interact_BasicRoundTrip_Succeeds()
+    {
+        var buffer = new InputBuffer();
+        buffer.Push(InputBuffer.BufferedAction.Interact, 0f);
+
+        bool result = buffer.TryConsume(InputBuffer.BufferedAction.Interact, 0.05f);
+
+        Assert.IsTrue(result);
+    }
+
+    [Test]
+    public void TryConsume_Interact_PastExpiryWindow_FailsAndRemovesEntry()
+    {
+        var buffer = new InputBuffer();
+        buffer.Push(InputBuffer.BufferedAction.Interact, 0f);
+
+        bool firstAttempt = buffer.TryConsume(InputBuffer.BufferedAction.Interact, 0.2f);
+        Assert.IsFalse(firstAttempt);
+
+        bool secondAttempt = buffer.TryConsume(InputBuffer.BufferedAction.Interact, 0.2f);
+        Assert.IsFalse(secondAttempt);
+    }
+
+    [Test]
+    public void Interact_DoesNotInterfereWithTheOtherFourBufferedActions()
+    {
+        var buffer = new InputBuffer();
+        buffer.Push(InputBuffer.BufferedAction.LightAttack, 0f);
+        buffer.Push(InputBuffer.BufferedAction.HeavyAttack, 0f);
+        buffer.Push(InputBuffer.BufferedAction.Parry, 0f);
+        buffer.Push(InputBuffer.BufferedAction.Dodge, 0f);
+        buffer.Push(InputBuffer.BufferedAction.Interact, 0f);
+
+        Assert.IsTrue(buffer.TryConsume(InputBuffer.BufferedAction.Interact, 0.01f));
+        Assert.IsTrue(buffer.TryConsume(InputBuffer.BufferedAction.HeavyAttack, 0.01f));
+        Assert.IsTrue(buffer.TryConsume(InputBuffer.BufferedAction.LightAttack, 0.01f));
+        Assert.IsTrue(buffer.TryConsume(InputBuffer.BufferedAction.Dodge, 0.01f));
+        Assert.IsTrue(buffer.TryConsume(InputBuffer.BufferedAction.Parry, 0.01f));
+    }
+
     [Test]
     public void TryConsume_CustomExpireSeconds_Respected()
     {
