@@ -223,9 +223,9 @@ public class BossPhaseControllerTests
         }
         Assert.IsTrue(_phase.Defeated);
 
-        // EndEncounter() reverts Follow/LookAt to the player transform -- with no
-        // playerFollowCam wired it no-ops safely, so the meaningful assertion here is that the
-        // call path executed without throwing and the latch flipped.
+        // EndEncounter() is now an explicit no-op with respect to camera framing (2026-08-02
+        // first-person camera pivot -- see BossCameraFraming.cs), so the meaningful assertion
+        // here is that the call path executed without throwing and the latch flipped.
         Object.DestroyImmediate(cameraGo);
         Object.DestroyImmediate(trackedPlayerGo);
     }
@@ -265,6 +265,46 @@ public class BossPhaseControllerTests
         {
             Assert.IsFalse(b.activeSelf, "Barriers deactivated by the defeat path should win over Phase 2's activation in the same event.");
         }
+    }
+
+    [Test]
+    public void HealthChanged_CrossingFiftyPercent_RaisesPhase2Notice()
+    {
+        string raisedText = null;
+        float raisedDuration = -1f;
+        System.Action<string, float> handler = (text, duration) => { raisedText = text; raisedDuration = duration; };
+        EventBus.ShowNotice += handler;
+
+        try
+        {
+            _bossHealth.ApplyDamage(60f, false); // crosses 50%
+        }
+        finally
+        {
+            EventBus.ShowNotice -= handler;
+        }
+
+        Assert.AreEqual("Phase 2!", raisedText);
+        Assert.Greater(raisedDuration, 0f);
+    }
+
+    [Test]
+    public void HealthChanged_AtZero_RaisesDefeatNotice()
+    {
+        string raisedText = null;
+        System.Action<string, float> handler = (text, duration) => { raisedText = text; };
+        EventBus.ShowNotice += handler;
+
+        try
+        {
+            _bossHealth.ApplyDamage(100f, false); // 0/100 -> defeat
+        }
+        finally
+        {
+            EventBus.ShowNotice -= handler;
+        }
+
+        Assert.AreEqual("Boss Defeated", raisedText);
     }
 
     [Test]

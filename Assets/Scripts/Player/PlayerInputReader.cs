@@ -5,9 +5,11 @@ using RevitalisedReturn.Generated;
 /// MonoBehaviour adapter over the generated Input Actions class
 /// (Assets/Settings/PlayerControls.inputactions). Owns the InputBuffer and feeds it
 /// from the button actions' `performed` callbacks; exposes raw move input via
-/// IMovementInput for PlayerRoot to transform into a camera-relative direction.
+/// IMovementInput for PlayerRoot to transform into a camera-relative direction, and raw
+/// look input (mouse delta / gamepad right-stick, charter first-person camera pivot --
+/// docs/Tasks/2026-08-02-first-person-camera-and-weapon.md) via ILookInput for PlayerLook.
 /// </summary>
-public sealed class PlayerInputReader : MonoBehaviour, IMovementInput
+public sealed class PlayerInputReader : MonoBehaviour, IMovementInput, ILookInput
 {
     private PlayerControls _controls;
     private readonly InputBuffer _inputBuffer = new InputBuffer();
@@ -15,6 +17,8 @@ public sealed class PlayerInputReader : MonoBehaviour, IMovementInput
     public InputBuffer InputBuffer => _inputBuffer;
 
     public Vector2 MoveRaw => _controls != null ? _controls.Player.move.ReadValue<Vector2>() : Vector2.zero;
+
+    public Vector2 LookRaw => _controls != null ? _controls.Player.look.ReadValue<Vector2>() : Vector2.zero;
 
     public event System.Action StanceNextPressed;
     public event System.Action StancePrevPressed;
@@ -29,6 +33,7 @@ public sealed class PlayerInputReader : MonoBehaviour, IMovementInput
         _controls.Player.dodge.performed += OnDodgePerformed;
         _controls.Player.stance_next.performed += OnStanceNextPerformed;
         _controls.Player.stance_prev.performed += OnStancePrevPerformed;
+        _controls.Player.interact.performed += OnInteractPerformed;
     }
 
     private void OnEnable()
@@ -52,6 +57,7 @@ public sealed class PlayerInputReader : MonoBehaviour, IMovementInput
         _controls.Player.dodge.performed -= OnDodgePerformed;
         _controls.Player.stance_next.performed -= OnStanceNextPerformed;
         _controls.Player.stance_prev.performed -= OnStancePrevPerformed;
+        _controls.Player.interact.performed -= OnInteractPerformed;
 
         _controls.Dispose();
         _controls = null;
@@ -83,6 +89,13 @@ public sealed class PlayerInputReader : MonoBehaviour, IMovementInput
         if (GameState.IsPlayerInputLocked())
             return;
         _inputBuffer.Push(InputBuffer.BufferedAction.Dodge, Time.time);
+    }
+
+    private void OnInteractPerformed(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    {
+        if (GameState.IsPlayerInputLocked())
+            return;
+        _inputBuffer.Push(InputBuffer.BufferedAction.Interact, Time.time);
     }
 
     private void OnStanceNextPerformed(UnityEngine.InputSystem.InputAction.CallbackContext ctx)

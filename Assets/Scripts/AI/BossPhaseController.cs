@@ -50,6 +50,8 @@ public sealed class BossPhaseController : MonoBehaviour
     [SerializeField] private Color enrageTrailColor = new Color(1f, 0.25f, 0.1f, 1f);
 
     private const float Phase2TraumaPunch = 0.5f;
+    private const float Phase2NoticeDuration = 2.5f;
+    private const float DefeatNoticeDuration = 3f;
 
     private bool _phase2Triggered;
     private bool _defeated;
@@ -123,6 +125,8 @@ public sealed class BossPhaseController : MonoBehaviour
         cameraTrauma?.AddTrauma(Phase2TraumaPunch);
 
         stanceMirror?.SetActive(true);
+
+        EventBus.RaiseShowNotice("Phase 2!", Phase2NoticeDuration);
     }
 
     /// <summary>
@@ -135,6 +139,8 @@ public sealed class BossPhaseController : MonoBehaviour
         SetBarriersActive(false);
 
         bossCameraFraming?.EndEncounter();
+
+        EventBus.RaiseShowNotice("Boss Defeated", DefeatNoticeDuration);
     }
 
     private void FireAoEKnockback()

@@ -2,28 +2,44 @@ using UnityEngine;
 using Unity.Cinemachine;
 
 /// <summary>
-/// Swaps the existing PlayerFollowCam rig's Follow/LookAt between the player alone and a
-/// CinemachineTargetGroup midpoint of player+boss (charter 8.2's camera midpoint tracking:
-/// cam_target = (player_position + boss_position) / 2 + isometric_offset). Reuses the rig's
-/// existing Body/Aim/Noise/CameraTrauma wiring untouched — Research's decisive finding against
-/// a second dedicated camera, since Step 6's CameraTrauma is wired to one specific
-/// CinemachineBasicMultiChannelPerlin instance that a second camera would need re-pointed or
-/// duplicated.
+/// Charter 8.2's boss camera midpoint tracking (cam_target = (player_position +
+/// boss_position) / 2 + isometric_offset) -- SCOPE DOWN per the 2026-08-02 first-person
+/// camera pivot (docs/Tasks/2026-08-02-first-person-camera-and-weapon.md). This class's
+/// original entire purpose was repointing PlayerFollowCam's Follow/LookAt to a
+/// CinemachineTargetGroup midpoint of player+boss. The player camera rig is now a
+/// CinemachineHardLockToTarget mount rigidly tracking the player's own EyeSocket child
+/// Transform (first-person, Damping 0) -- repointing that same hard-locked camera to a
+/// floating midpoint in space would no longer be a first-person camera at all, so the
+/// Follow/LookAt repoint is INCOMPATIBLE and has been removed, not adapted.
 ///
-/// Member weight=1/radius=0 per Research's live-verified numeric finding: TargetGroup.Sphere
-/// is a radius-weighted average position, not a plain midpoint — radius=0 per member is
-/// required to match the charter's literal (player+boss)/2 formula (a nonzero radius biases
-/// the average toward whichever member has the larger radius).
+/// Research reported three feasible alternatives (a second boss vcam + priority blend, a
+/// degrade-to-no-op, or a CinemachineGroupFraming extension needing a non-hard-locked
+/// camera). The Director chose to keep the FPS rig live through boss fights and explicitly
+/// descope the literal midpoint framing rather than build a new PanTilt-recenter-toward-boss
+/// system in this already-large pivot -- that recenter system is a real, named follow-up,
+/// not silently dropped (see the task file's Approach section).
+///
+/// StartEncounter()/EndEncounter() are therefore explicit no-ops with respect to camera
+/// framing. BossPhaseController.OnEnable()/TriggerDefeat() still call them unconditionally
+/// (untouched per this task's scope -- only this file's internals changed), so the
+/// descope decision stays visible at those call sites rather than the calls just vanishing.
+///
+/// EnsureTargetGroup()/TargetGroup are kept: the midpoint-tracking CinemachineTargetGroup
+/// itself is harmless to keep computing (nothing repoints a camera to it anymore) and is
+/// exactly the building block a future PanTilt-recenter follow-up would reuse rather than
+/// reinvent.
 /// </summary>
 public sealed class BossCameraFraming : MonoBehaviour
 {
-    [SerializeField] private CinemachineCamera playerFollowCam;
     [SerializeField] private Transform playerTransform;
     [SerializeField] private Transform bossTransform;
 
     /// <summary>
-    /// The CinemachineTargetGroup this framing reads. Auto-added to this GameObject in Awake
-    /// if not pre-wired (e.g. by a test or by scene setup wiring an existing component).
+    /// The CinemachineTargetGroup this framing computes. Auto-added to this GameObject in
+    /// Awake if not pre-wired (e.g. by a test or by scene setup wiring an existing
+    /// component). No longer consumed as a camera Follow/LookAt target by this class (see
+    /// class doc comment) -- retained as the reusable midpoint-tracking building block for
+    /// a future recenter system.
     /// </summary>
     [SerializeField] private CinemachineTargetGroup targetGroup;
 
@@ -63,27 +79,17 @@ public sealed class BossCameraFraming : MonoBehaviour
     }
 
     /// <summary>
-    /// Reframes the existing PlayerFollowCam rig onto the player/boss midpoint for the
-    /// duration of a boss encounter.
+    /// No-op with respect to camera framing (see class doc comment) -- the hard-locked FPS
+    /// rig stays on the player's EyeSocket throughout boss encounters. Kept as a call site
+    /// (rather than removed) so BossPhaseController.OnEnable's existing call documents the
+    /// descope decision instead of silently vanishing.
     /// </summary>
     public void StartEncounter()
     {
-        if (playerFollowCam == null || targetGroup == null)
-            return;
-
-        playerFollowCam.Follow = targetGroup.transform;
-        playerFollowCam.LookAt = targetGroup.transform;
     }
 
-    /// <summary>
-    /// Restores the rig's original single-target tracking on the player (e.g. on boss defeat).
-    /// </summary>
+    /// <summary>No-op with respect to camera framing — see StartEncounter().</summary>
     public void EndEncounter()
     {
-        if (playerFollowCam == null || playerTransform == null)
-            return;
-
-        playerFollowCam.Follow = playerTransform;
-        playerFollowCam.LookAt = playerTransform;
     }
 }

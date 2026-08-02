@@ -945,3 +945,33 @@ correctness) and Step 9 (visual/pacing: does the greybox read clearly, is the sh
 reachable, does the arena feel right). Then Director opens the Step 10 task brief
 (Interactive Objects, Inventory Data & Gathering Economy) — which also finally gives Step 9's
 inert Shrine/GraveMarker placeholders real interaction behavior.
+
+**2026-08-02: First-Person Camera Pivot & Player Weapon — explicit, logged charter deviation.**
+At the user's explicit request, the camera model changes from this charter's locked
+"isometric/third-person" (Section 0) to **first-person**, following the same
+log-the-deviation-don't-silently-contradict-the-charter precedent as the 2026-07-31
+Godot→Unity engine pivot. `MovementTest.unity`'s `PlayerFollowCam` rig now uses
+`CinemachineHardLockToTarget` (Body) + `CinemachinePanTilt` (Aim) tracking a new `EyeSocket`
+on the Player root; a new `PlayerLook.cs` accumulates mouse-look into yaw (applied directly to
+the player root's own `transform.rotation` — the root itself yaws, camera is just a pitching
+child, avoiding a feedback-loop with Cinemachine's `LateUpdate`) and pitch (relayed into
+`CinemachinePanTilt` by a new small `CameraPitchDriver.cs`, since `CinemachineInputAxisController`
+was deliberately not used — it lacks this project's `GameState.IsPlayerInputLocked()` input
+gating). **A real pre-existing bug was found and fixed as a side effect:** nothing had ever
+rotated the player root, so `WeaponPivot` always swung toward world-north regardless of
+facing — root-yaw fixes this for free. A placeholder weapon mesh (elongated cube, matching
+this project's existing primitive-placeholder convention) is now attached to the pre-existing
+`WeaponPivot` hitbox socket. **Step 8.2's boss-arena camera framing is explicitly descoped to
+a no-op** this pass — `BossCameraFraming`'s Follow/LookAt target-group repoint is incompatible
+with a hard-locked FPS camera; a full PanTilt-recenter-toward-boss replacement is a named,
+logged follow-up, not built yet. `Prologue.unity` has no FPS rig ported to it yet (also a
+named follow-up — `MovementTest.unity` remains the pipeline's proof scene, per every prior
+step's own single-scene-proof precedent). 349 tests, 0 failures, independently QA- and
+Director-verified (scene/prefab wiring, script review, SOLID). See
+`docs/Tasks/2026-08-02-first-person-camera-and-weapon.md` for full research/approach/QA detail.
+**Human Play Mode confirmation is still outstanding** — this session's Unity-MCP tool grant
+has no Play Mode control or Game View screenshot access, so no pipeline agent could perform it;
+same standing gap as Steps 6/7/8/9 above.
+
+**Next action:** a human Play Mode pass covering both the new first-person camera/weapon feel
+*and* the Steps 6/7/8/9 backlog above, then Director opens the Step 10 task brief.

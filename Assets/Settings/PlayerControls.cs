@@ -173,6 +173,16 @@ namespace RevitalisedReturn.Generated
                     ""interactions"": """",
                     ""initialStateCheck"": false,
                     ""priority"": 0
+                },
+                {
+                    ""name"": ""look"",
+                    ""type"": ""Value"",
+                    ""id"": ""5f5ab103-0fb8-4197-8197-a656c66bd2a1"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true,
+                    ""priority"": 0
                 }
             ],
             ""bindings"": [
@@ -395,6 +405,28 @@ namespace RevitalisedReturn.Generated
                     ""action"": ""interact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""aa3bd8a6-d90d-4fcc-b587-d234cee012b1"",
+                    ""path"": ""<Mouse>/delta"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""look"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7961f8cc-0c45-4cf5-ac53-da67e9229c33"",
+                    ""path"": ""<Gamepad>/rightStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""look"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -411,6 +443,7 @@ namespace RevitalisedReturn.Generated
             m_Player_stance_next = m_Player.FindAction("stance_next", throwIfNotFound: true);
             m_Player_stance_prev = m_Player.FindAction("stance_prev", throwIfNotFound: true);
             m_Player_interact = m_Player.FindAction("interact", throwIfNotFound: true);
+            m_Player_look = m_Player.FindAction("look", throwIfNotFound: true);
         }
 
         ~@PlayerControls()
@@ -499,6 +532,7 @@ namespace RevitalisedReturn.Generated
         private readonly InputAction m_Player_stance_next;
         private readonly InputAction m_Player_stance_prev;
         private readonly InputAction m_Player_interact;
+        private readonly InputAction m_Player_look;
         /// <summary>
         /// Provides access to input actions defined in input action map "Player".
         /// </summary>
@@ -542,6 +576,10 @@ namespace RevitalisedReturn.Generated
             /// Provides access to the underlying input action "Player/interact".
             /// </summary>
             public InputAction @interact => m_Wrapper.m_Player_interact;
+            /// <summary>
+            /// Provides access to the underlying input action "Player/look".
+            /// </summary>
+            public InputAction @look => m_Wrapper.m_Player_look;
             /// <summary>
             /// Provides access to the underlying input action map instance.
             /// </summary>
@@ -592,6 +630,9 @@ namespace RevitalisedReturn.Generated
                 @interact.started += instance.OnInteract;
                 @interact.performed += instance.OnInteract;
                 @interact.canceled += instance.OnInteract;
+                @look.started += instance.OnLook;
+                @look.performed += instance.OnLook;
+                @look.canceled += instance.OnLook;
             }
 
             /// <summary>
@@ -627,6 +668,9 @@ namespace RevitalisedReturn.Generated
                 @interact.started -= instance.OnInteract;
                 @interact.performed -= instance.OnInteract;
                 @interact.canceled -= instance.OnInteract;
+                @look.started -= instance.OnLook;
+                @look.performed -= instance.OnLook;
+                @look.canceled -= instance.OnLook;
             }
 
             /// <summary>
@@ -723,6 +767,13 @@ namespace RevitalisedReturn.Generated
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnInteract(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "look" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnLook(InputAction.CallbackContext context);
         }
     }
 }

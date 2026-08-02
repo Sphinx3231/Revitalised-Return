@@ -729,7 +729,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6b015b9981bbc745b8f2627467c0c83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossCameraFraming
-  playerFollowCam: {fileID: 1706800310}
   playerTransform: {fileID: 710612223}
   bossTransform: {fileID: 2087321446}
   targetGroup: {fileID: 598608183}
@@ -1720,9 +1719,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1706800311}
   - component: {fileID: 1706800310}
-  - component: {fileID: 1706800309}
-  - component: {fileID: 1706800308}
   - component: {fileID: 1706800312}
+  - component: {fileID: 1706800315}
+  - component: {fileID: 1706800314}
+  - component: {fileID: 1706800313}
   m_Layer: 0
   m_Name: PlayerFollowCam
   m_TagString: Untagged
@@ -1730,54 +1730,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1706800308
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1706800307}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f38bda98361e1de48a4ca2bd86ea3c17, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineRotationComposer
-  Composition:
-    ScreenPosition: {x: 0, y: 0}
-    DeadZone:
-      Enabled: 0
-      Size: {x: 0.2, y: 0.2}
-    HardLimits:
-      Enabled: 0
-      Size: {x: 0.8, y: 0.8}
-      Offset: {x: 0, y: 0}
-  CenterOnActivate: 1
-  TargetOffset: {x: 0, y: 0, z: 0}
-  Damping: {x: 0.5, y: 0.5}
-  Lookahead:
-    Enabled: 0
-    Time: 0
-    Smoothing: 0
-    IgnoreY: 0
---- !u!114 &1706800309
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1706800307}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b617507da6d07e749b7efdb34e1173e1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineFollow
-  TrackerSettings:
-    BindingMode: 4
-    PositionDamping: {x: 0.5, y: 0.5, z: 0.5}
-    AngularDampingMode: 0
-    RotationDamping: {x: 1, y: 1, z: 1}
-    QuaternionDamping: 1
-  FollowOffset: {x: 0, y: 4, z: -6}
 --- !u!114 &1706800310
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1798,8 +1750,8 @@ MonoBehaviour:
   m_StreamingVersion: 20241001
   m_LegacyPriority: 0
   Target:
-    TrackingTarget: {fileID: 710612223}
-    LookAtTarget: {fileID: 710612223}
+    TrackingTarget: {fileID: 1915903333}
+    LookAtTarget: {fileID: 1915903333}
     CustomLookAtTarget: 1
   Lens:
     FieldOfView: 40
@@ -1853,6 +1805,67 @@ MonoBehaviour:
   AmplitudeGain: 0
   FrequencyGain: 1
   m_NoiseOffsets: {x: 0, y: 0, z: 0}
+--- !u!114 &1706800313
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1706800307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 588777d398c5513469d90256fd4a3dea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraPitchDriver
+  playerLook: {fileID: 1915903334}
+  panTilt: {fileID: 1706800314}
+--- !u!114 &1706800314
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1706800307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62d54399b04b4fa48a73e121d4937dd4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachinePanTilt
+  ReferenceFrame: 0
+  RecenterTarget: 0
+  PanAxis:
+    Value: 0
+    Center: 0
+    Range: {x: -180, y: 180}
+    Wrap: 1
+    Recentering:
+      Enabled: 0
+      Wait: 1
+      Time: 2
+    Restrictions: 0
+  TiltAxis:
+    Value: 0
+    Center: 0
+    Range: {x: -80, y: 80}
+    Wrap: 0
+    Recentering:
+      Enabled: 0
+      Wait: 1
+      Time: 2
+    Restrictions: 0
+--- !u!114 &1706800315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1706800307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36d1163fa822e8b418a0a603ec078d5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineHardLockToTarget
+  Damping: 0
 --- !u!1 &1792017647
 GameObject:
   m_ObjectHideFlags: 0
@@ -1978,6 +1991,22 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
   CustomBlends: {fileID: 0}
+--- !u!4 &1915903333 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 9100000000000002, guid: bb586b9e0ee886343a80d108a774cafb, type: 3}
+  m_PrefabInstance: {fileID: 1246992232190894456}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1915903334 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 863919851037844907, guid: bb586b9e0ee886343a80d108a774cafb, type: 3}
+  m_PrefabInstance: {fileID: 1246992232190894456}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2834dc306d097e442bea5e9c50002c87, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerLook
 --- !u!1 &1923954244
 GameObject:
   m_ObjectHideFlags: 0

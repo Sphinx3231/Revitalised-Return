@@ -21,7 +21,12 @@ public sealed class InputBuffer
         LightAttack,
         HeavyAttack,
         Parry,
-        Dodge
+        Dodge,
+        // Step 10 (Unity port) / Step 3.2 amendment: `interact` is bound in the Input
+        // Actions asset since Phase 1 but was never wired past that. Buffered like the
+        // other four discrete actions so InteractionResolver gets double-fire prevention
+        // structurally via TryConsume rather than a hand-rolled guard.
+        Interact
     }
 
     private struct Entry

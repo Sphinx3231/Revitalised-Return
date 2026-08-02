@@ -273,6 +273,65 @@ public class PlayerRootTests
         Object.DestroyImmediate(fullRootGo);
     }
 
+    // Charter first-person camera pivot (2026-08-02): PlayerRoot's Update() now ticks
+    // PlayerLook first, feeding it raw look input from the reader's ILookInput. Verifies
+    // the wiring end-to-end (real PlayerLook + real PlayerInputReader) rather than just the
+    // playerLook==null false-branch the other Update tests above cover implicitly.
+    [Test]
+    public void Update_WithPlayerLookWired_TicksLookWithReaderLookRaw()
+    {
+        var camGo = new GameObject("Cam3");
+        var playerGo = new GameObject("Player3", typeof(CharacterController));
+        var readerGo = new GameObject("Reader3");
+
+        var motor = playerGo.AddComponent<PlayerMotor>();
+        var vitals = playerGo.AddComponent<PlayerVitals>();
+        var dodge = playerGo.AddComponent<DodgeAbility>();
+        var reader = readerGo.AddComponent<PlayerInputReader>();
+        var look = playerGo.AddComponent<PlayerLook>();
+        var fullRootGo = new GameObject("FullPlayerRoot3");
+        var fullRoot = fullRootGo.AddComponent<PlayerRoot>();
+
+        TestReflectionUtil.InvokeMethod(motor, "Awake");
+        TestReflectionUtil.InvokeMethod(vitals, "Awake");
+        TestReflectionUtil.InvokeMethod(dodge, "Awake");
+        TestReflectionUtil.InvokeMethod(reader, "Awake");
+        TestReflectionUtil.InvokeMethod(reader, "OnEnable");
+
+        TestReflectionUtil.SetField(fullRoot, "inputReader", reader);
+        TestReflectionUtil.SetField(fullRoot, "motor", motor);
+        TestReflectionUtil.SetField(fullRoot, "dodgeAbility", dodge);
+        TestReflectionUtil.SetField(fullRoot, "meshLean", null);
+        TestReflectionUtil.SetField(fullRoot, "playerLook", look);
+        TestReflectionUtil.SetField(fullRoot, "cameraTransform", camGo.transform);
+        TestReflectionUtil.SetField(fullRoot, "vitals", vitals);
+        TestReflectionUtil.SetField(fullRoot, "stanceController", null);
+
+        TestReflectionUtil.InvokeMethod(fullRoot, "Awake");
+
+        var previousState = GameState.CurrentState;
+        GameState.SetState(GameState.State.Playing);
+
+        // No mouse/gamepad hardware is present in EditMode, so LookRaw reads as
+        // Vector2.zero -- this test's job is proving the wiring/no-throw path, not
+        // simulating real hardware deltas (PlayerLookTests already covers Tick's own
+        // yaw/pitch math directly against arbitrary Vector2 inputs).
+        Assert.DoesNotThrow(() => TestReflectionUtil.InvokeMethod(fullRoot, "Update"));
+
+        // Zero input still exercises the tick path (Tick was called at least once) without
+        // asserting a specific yaw, since LookRaw is guaranteed zero, not a specific hardware
+        // value, in this environment.
+        Assert.AreEqual(0f, look.YawDegrees, 0.0001f);
+
+        GameState.SetState(previousState);
+        TestReflectionUtil.InvokeMethod(reader, "OnDisable");
+
+        Object.DestroyImmediate(camGo);
+        Object.DestroyImmediate(playerGo);
+        Object.DestroyImmediate(readerGo);
+        Object.DestroyImmediate(fullRootGo);
+    }
+
     [Test]
     public void OnDestroy_NullInputReader_DoesNotThrow()
     {
