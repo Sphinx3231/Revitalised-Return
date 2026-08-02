@@ -168,6 +168,7 @@ public class PlayerSaveDto
         data.discoveredShrines = new HashSet<string>(discoveredShrines);
         data.bossesDefeated = new List<string>(bossesDefeated);
         data.lootedContainers = new List<string>(lootedContainers);
+        data.dialogueSeen = new HashSet<string>(dialogueSeen);
 
         data.worldFlags.Clear();
         foreach (var entry in worldFlags)
@@ -190,8 +191,6 @@ public class PlayerSaveDto
         data.questStates.Clear();
         foreach (var entry in questStates)
             data.questStates[entry.questId] = entry.state;
-
-        data.dialogueSeen = new List<string>(dialogueSeen);
 
         data.npcStates.Clear();
         foreach (var entry in npcStates)

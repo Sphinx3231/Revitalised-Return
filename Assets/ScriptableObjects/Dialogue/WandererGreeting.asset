@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3664c748bfae8855db8c6194e124c289, type: 3}
+  m_Name: WandererGreeting
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueTree
+  dialogueId: wanderer_greeting
+  startNodeId: greet
+  nodes:
+  - id: greet
+    speaker: Ashen Wanderer
+    text: Ho there, traveler. The road to the shrine ahead is long, but rest waits
+      at its end.
+    portrait: {fileID: 0}
+    voiceClip: {fileID: 0}
+    cameraShotMarker:
+    animationCue:
+    choices:
+    - text: Ask about the shrine ahead
+      targetNodeId: shrine_info
+      visibilityConditions: []
+    - text: Move on
+      targetNodeId:
+      visibilityConditions: []
+    mutations: []
+  - id: shrine_info
+    speaker: Ashen Wanderer
+    text: Rest there, and the ashes will remember your passing. Go well, Jin
+      Takakura.
+    portrait: {fileID: 0}
+    voiceClip: {fileID: 0}
+    cameraShotMarker:
+    animationCue:
+    choices:
+    - text: Farewell
+      targetNodeId:
+      visibilityConditions: []
+    mutations:
+    - source: 0
+      key: prologue_wanderers_path
+      intValue: 1
+      stringValue:

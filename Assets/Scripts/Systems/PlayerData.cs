@@ -15,10 +15,17 @@ using System.Collections.Generic;
 /// question (visited or not), never ordered/indexed, so a HashSet documents that intent
 /// directly and makes double-adds a no-op for free.
 ///
-/// Fields with no backing system yet -- equippedCharms (Step 10 charm-equip / Step 12
-/// territory), questStates/dialogueSeen/npcStates (Step 12 territory) -- get their locked
-/// types now per the charter so the save format never needs a breaking migration later, but
-/// they serialize/round-trip empty until those systems exist. Not silently omitted.
+/// dialogueSeen is also a HashSet&lt;string&gt; for the exact same reason (Step 12 fix, closing a
+/// defect this class's own doc comment predicted at Step 11: "seen or not" is a pure membership
+/// question, never ordered/indexed -- a List meant unbounded duplicate growth + O(n) Contains
+/// checks over a 20-hour campaign). PlayerSaveDto's on-disk format is unchanged -- the DTO field
+/// stays List&lt;string&gt; (JsonUtility needs a List on the wire), only this runtime field's type
+/// changed, same List&lt;-&gt;HashSet conversion idiom discoveredShrines already uses.
+///
+/// Fields with no backing system yet -- equippedCharms (Step 10 charm-equip territory) -- get
+/// its locked type now per the charter so the save format never needs a breaking migration
+/// later, but it serializes/round-trips empty until that system exists. Not silently omitted.
+/// questStates/dialogueSeen/npcStates are Step 12's real, now-implemented systems.
 /// </summary>
 public class PlayerData
 {
@@ -52,9 +59,8 @@ public class PlayerData
     // now, serializes empty.
     public List<string> equippedCharms = new List<string>();
 
-    // No quest/dialogue/npc systems exist yet (Step 12 territory) -- locked types now,
-    // serialize empty.
+    // Quest/dialogue/npc state (Step 12).
     public Dictionary<string, int> questStates = new Dictionary<string, int>();
-    public List<string> dialogueSeen = new List<string>();
+    public HashSet<string> dialogueSeen = new HashSet<string>();
     public Dictionary<string, string> npcStates = new Dictionary<string, string>();
 }

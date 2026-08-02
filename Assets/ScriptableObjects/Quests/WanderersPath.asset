@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa402072afb3ea14ab3070e5e427de08, type: 3}
+  m_Name: WanderersPath
+  m_EditorClassIdentifier: Assembly-CSharp::Quest
+  questId: prologue_wanderers_path
+  displayName: The Wanderer's Path
+  journalHint: An old traveler near the ashfields spoke of a shrine ahead -- she
+    said resting there would ease the road.
+  objectiveDescription: Rest at the shrine the wanderer described.
+  advancementConditions:
+  - source: 4
+    op: 0
+    key: shrine_info
+    intValue: 1
+    stringValue:

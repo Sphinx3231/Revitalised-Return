@@ -140,7 +140,7 @@ public class PlayerSaveDtoTests
         CollectionAssert.AreEqual(new[] { "captain_renzo" }, reloaded.bossesDefeated);
         CollectionAssert.AreEqual(new[] { "chest_001" }, reloaded.lootedContainers);
         CollectionAssert.AreEqual(new[] { "omamori_wind" }, reloaded.equippedCharms);
-        CollectionAssert.AreEqual(new[] { "intro_line_1" }, reloaded.dialogueSeen);
+        CollectionAssert.AreEquivalent(new[] { "intro_line_1" }, reloaded.dialogueSeen);
     }
 
     [Test]
@@ -182,6 +182,28 @@ public class PlayerSaveDtoTests
         Assert.DoesNotThrow(() => reloaded = dto.ToPlayerData(null));
 
         Assert.AreEqual(0, reloaded.inventory.stacks.Count);
+    }
+
+    [Test]
+    public void RoundTrip_DialogueSeen_IsHashSet_DedupsDuplicateEntries()
+    {
+        // Step 12 fix: PlayerData.dialogueSeen changed from List<string> to HashSet<string>
+        // (a pure membership question, same reasoning as discoveredShrines). The on-disk DTO
+        // format is unchanged (still List<string> on the wire, JsonUtility needs a List) --
+        // this test proves the reconstructed PlayerData field really is a HashSet by round-
+        // tripping data containing a duplicate id and asserting it collapses to one entry.
+        var original = new PlayerData();
+        original.dialogueSeen.Add("intro_line_1");
+        original.dialogueSeen.Add("intro_line_1"); // no-op on a HashSet -- proves the type directly.
+
+        PlayerSaveDto dto = PlayerSaveDto.FromPlayerData(original);
+        Assert.AreEqual(1, dto.dialogueSeen.Count, "FromPlayerData must not emit duplicate dialogueSeen entries from a HashSet source.");
+
+        PlayerData reloaded = JsonUtility.FromJson<PlayerSaveDto>(JsonUtility.ToJson(dto)).ToPlayerData(null);
+
+        Assert.IsInstanceOf<HashSet<string>>(reloaded.dialogueSeen);
+        Assert.AreEqual(1, reloaded.dialogueSeen.Count);
+        Assert.IsTrue(reloaded.dialogueSeen.Contains("intro_line_1"));
     }
 
     [Test]

@@ -22,6 +22,11 @@ public class ShrineTests
         SaveSystem.Current = null;
         SaveSystem.CurrentPlayerData = null;
         SaveSystem.CurrentSlot = 0;
+
+        // QuestSystem's Quest-registry is static (Step 12) -- clear it so no other test's
+        // registered Quest instances leak into Shrine.Interact's QuestSystem.TickOnRest(data)
+        // call, and vice versa.
+        QuestSystem.ClearRegistry();
     }
 
     [TearDown]
@@ -32,6 +37,8 @@ public class ShrineTests
         SaveSystem.Current = null;
         SaveSystem.CurrentPlayerData = null;
         SaveSystem.CurrentSlot = 0;
+
+        QuestSystem.ClearRegistry();
     }
 
     [Test]
@@ -127,6 +134,65 @@ public class ShrineTests
         }
         finally
         {
+            if (System.IO.Directory.Exists(tempRoot))
+                System.IO.Directory.Delete(tempRoot, true);
+        }
+    }
+
+    [Test]
+    public void Interact_QuestSystemTickOnRest_RunsBeforeSaveSystemSave()
+    {
+        // Charter Step 12: shrine rest is the single deterministic quest-tick point, and the
+        // ordering is locked -- QuestSystem.TickOnRest(data) must run BEFORE
+        // SaveSystem.Current.Save(...), or every rest persists the pre-tick state and a reload
+        // loses one tick of progression. Proven end-to-end via the real SaveSystem/QuestSystem
+        // registry: a quest that ticks Active -> ObjectiveComplete on rest must already show
+        // ObjectiveComplete in the file SaveSystem.Save() wrote, not the pre-tick Active value.
+        string tempRoot = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "ReturnShrineTests_" + System.Guid.NewGuid().ToString("N"));
+        var saveSystem = new SaveSystem(tempRoot);
+
+        Quest quest = ScriptableObject.CreateInstance<Quest>();
+        quest.questId = "prologue_wanderers_path";
+        quest.advancementConditions = new System.Collections.Generic.List<DialogueCondition>
+        {
+            new DialogueCondition { source = DialogueCondition.Source.DialogueSeen, op = DialogueCondition.Op.Equals, key = "shrine_info", intValue = 1 },
+        };
+
+        try
+        {
+            TestReflectionUtil.SetField(_shrine, "shrineId", "prologue_entrance");
+            SaveSystem.Current = saveSystem;
+            SaveSystem.CurrentSlot = 0;
+            SaveSystem.CurrentPlayerData = new PlayerData();
+            QuestSystem.SetState(SaveSystem.CurrentPlayerData, "prologue_wanderers_path", QuestState.Active);
+            SaveSystem.CurrentPlayerData.dialogueSeen.Add("shrine_info");
+
+            _shrine.Interact(_go.transform);
+
+            // In-memory state reflects the post-tick value.
+            Assert.AreEqual(QuestState.ObjectiveComplete, QuestSystem.GetState(SaveSystem.CurrentPlayerData, "prologue_wanderers_path"));
+
+            // The persisted file reflects it too -- proving the tick ran BEFORE Save(), not
+            // after. Parsed back through the real DTO type rather than raw string-matching so
+            // this assertion isn't sensitive to JsonUtility's pretty-print spacing.
+            string livePath = System.IO.Path.Combine(tempRoot, "slot0.json");
+            string json = System.IO.File.ReadAllText(livePath);
+            PlayerSaveDto persistedDto = JsonUtility.FromJson<PlayerSaveDto>(json);
+
+            bool found = false;
+            foreach (var entry in persistedDto.questStates)
+            {
+                if (entry.questId == "prologue_wanderers_path")
+                {
+                    Assert.AreEqual((int)QuestState.ObjectiveComplete, entry.state);
+                    found = true;
+                }
+            }
+            Assert.IsTrue(found, "Persisted save file must contain the post-tick quest state.");
+        }
+        finally
+        {
+            Object.DestroyImmediate(quest);
             if (System.IO.Directory.Exists(tempRoot))
                 System.IO.Directory.Delete(tempRoot, true);
         }

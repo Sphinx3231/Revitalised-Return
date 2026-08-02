@@ -25,6 +25,13 @@ public sealed class Shrine : Interactable
         if (data != null && !string.IsNullOrEmpty(shrineId))
         {
             data.discoveredShrines.Add(shrineId);
+
+            // Charter Step 12: shrine rest is "the single deterministic quest-tick point" --
+            // this MUST run before SaveSystem.Save() below, or every rest persists the
+            // pre-tick state and a reload loses one tick of progression (locked, tested
+            // ordering, not a style preference).
+            QuestSystem.TickOnRest(data);
+
             SaveSystem.Current?.Save(SaveSystem.CurrentSlot, data);
         }
 
