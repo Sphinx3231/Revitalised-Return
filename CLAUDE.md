@@ -1020,5 +1020,44 @@ Unity's `JsonUtility` can actually round-trip `PlayerData`'s locked `Dictionary`
 fields (a real, documented API limitation, not a style question) or whether `System.Text.Json`
 is required instead. See `docs/Tasks/2026-08-02-step-11-hud-persistence.md`.
 
-**Next action:** await Research findings, then Director approach sign-off, then Implementation
-→ QA → fix loop per the standard pipeline, for Step 11.
+**2026-08-02: Step 11 (Reactive HUD, UI Systems & Persistence Engine — compass/map/save-load
+scope) is done.** `PlayerData`/`PlayerSaveDto`/`SaveSystem` implement the locked save policy:
+`PlayerSaveDto` flattens every `Dictionary`-shaped `PlayerData` field (stats, worldFlags,
+questStates, npcStates) plus `Inventory` into JsonUtility-safe lists (a real, verified Unity
+API constraint — `JsonUtility` silently drops `Dictionary` fields and non-`[Serializable]`
+types), `SaveSystem` is a ctor-injectable-root-dir instance class (Dependency Inversion, not
+a `persistentDataPath`-hardcoded singleton) with atomic `File.Replace(tmp,live,bak)` writes
+and a first-save `File.Move` guard (the 3-arg `File.Move` overload doesn't exist at this
+project's .NET Standard 2.0 API level — confirmed, not assumed). `ItemDatabase` resolves
+saved itemIds back to `ItemData` assets on load. `Shrine.Interact` now saves-on-rest (adds
+its new `shrineId` to `discoveredShrines`, calls `SaveSystem.Current.Save()`) when a save
+context exists, degrading gracefully to its old placeholder notice otherwise. `CompassStrip`/
+`CompassProjection` (pure-function marker math) and `MapScreen` (reads `RegionGraph` for
+position/name/kind, `PlayerData.discoveredShrines` for reveal state) round out the HUD; a new
+`map` (M key) Input Action toggles the map screen. `SaveSlotMenu` gives `MainMenu.unity` 3 real
+save slots with filesystem-timestamp metadata (deliberately not a `PlayerData` field — Director
+ruling against an unlocked schema change for a cosmetic detail).
+
+**A real, standing-gate violation was caught and fixed within this task's own QA cycle:**
+QA Attempt 1 found `CompassStrip.cs`/`MapScreen.cs`/`SaveSlotMenu.cs` at 0% coverage — invisible
+in the whole-project aggregate (which stayed >90%, diluted by the rest of the codebase) but a
+real fail against the gate's actual scope, "newly-added logic-bearing code." A fix loop added
+35 targeted tests. **Then QA itself declined to rubber-stamp the fix's self-reported 100%
+coverage numbers** — the user's interactive Unity Editor was open, blocking a second batchmode
+instance from measuring independently (Unity refuses this outright), and rather than force-close
+the user's session or accept an unverified number, QA escalated to the Director, who asked the
+user directly. **The user closed their Editor specifically so verification could complete**,
+and a from-scratch batchmode run confirmed all four claimed numbers (100%/100%/100% on the
+three classes, 97% aggregate) exactly. See
+`docs/Tasks/2026-08-02-step-11-hud-persistence.md` for the full multi-attempt record.
+
+**Standing gap, narrower than before:** the mandatory human Play Mode pass for Steps 6-10 and
+the FPS pivot was confirmed clean this session (see above), but Step 11's own new content
+(compass strip, map screen, shrine-save-on-rest, save-slot menu) is new since that pass and
+still needs its own confirmation.
+
+**Next action:** a human Play Mode pass on Step 11's new content specifically (open the map
+with `M`, check the compass tracks yaw correctly, rest at the shrine and confirm a save file
+is written / discoveredShrines persists, back out to MainMenu and confirm the slot shows real
+metadata), then Director opens the Step 12 task brief (Narrative Engine, Dialogue Trees & Quest
+State Machine) in strict 14-step order.

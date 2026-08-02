@@ -183,6 +183,16 @@ namespace RevitalisedReturn.Generated
                     ""interactions"": """",
                     ""initialStateCheck"": true,
                     ""priority"": 0
+                },
+                {
+                    ""name"": ""map"",
+                    ""type"": ""Button"",
+                    ""id"": ""31473dd2-8fc8-42f9-94d5-04349eafdec0"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
                 }
             ],
             ""bindings"": [
@@ -427,6 +437,28 @@ namespace RevitalisedReturn.Generated
                     ""action"": ""look"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""abf25f3c-8aaa-447a-adc7-bbede0c8047e"",
+                    ""path"": ""<Keyboard>/m"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""map"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f03c3319-2575-4068-a2e4-dafce14559ac"",
+                    ""path"": ""<Gamepad>/select"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""map"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -444,6 +476,7 @@ namespace RevitalisedReturn.Generated
             m_Player_stance_prev = m_Player.FindAction("stance_prev", throwIfNotFound: true);
             m_Player_interact = m_Player.FindAction("interact", throwIfNotFound: true);
             m_Player_look = m_Player.FindAction("look", throwIfNotFound: true);
+            m_Player_map = m_Player.FindAction("map", throwIfNotFound: true);
         }
 
         ~@PlayerControls()
@@ -533,6 +566,7 @@ namespace RevitalisedReturn.Generated
         private readonly InputAction m_Player_stance_prev;
         private readonly InputAction m_Player_interact;
         private readonly InputAction m_Player_look;
+        private readonly InputAction m_Player_map;
         /// <summary>
         /// Provides access to input actions defined in input action map "Player".
         /// </summary>
@@ -580,6 +614,10 @@ namespace RevitalisedReturn.Generated
             /// Provides access to the underlying input action "Player/look".
             /// </summary>
             public InputAction @look => m_Wrapper.m_Player_look;
+            /// <summary>
+            /// Provides access to the underlying input action "Player/map".
+            /// </summary>
+            public InputAction @map => m_Wrapper.m_Player_map;
             /// <summary>
             /// Provides access to the underlying input action map instance.
             /// </summary>
@@ -633,6 +671,9 @@ namespace RevitalisedReturn.Generated
                 @look.started += instance.OnLook;
                 @look.performed += instance.OnLook;
                 @look.canceled += instance.OnLook;
+                @map.started += instance.OnMap;
+                @map.performed += instance.OnMap;
+                @map.canceled += instance.OnMap;
             }
 
             /// <summary>
@@ -671,6 +712,9 @@ namespace RevitalisedReturn.Generated
                 @look.started -= instance.OnLook;
                 @look.performed -= instance.OnLook;
                 @look.canceled -= instance.OnLook;
+                @map.started -= instance.OnMap;
+                @map.performed -= instance.OnMap;
+                @map.canceled -= instance.OnMap;
             }
 
             /// <summary>
@@ -774,6 +818,13 @@ namespace RevitalisedReturn.Generated
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnLook(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "map" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnMap(InputAction.CallbackContext context);
         }
     }
 }

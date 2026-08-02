@@ -23,6 +23,14 @@ public sealed class PlayerInputReader : MonoBehaviour, IMovementInput, ILookInpu
     public event System.Action StanceNextPressed;
     public event System.Action StancePrevPressed;
 
+    /// <summary>
+    /// Fired on the `map` action's performed callback (M key, charter Step 11). Direct-event,
+    /// not InputBuffer-routed -- matches the existing stance-switch pattern: this is a discrete
+    /// UI toggle, not a combo-cancelable combat action, so it has no business sitting in the
+    /// 0.15s combat action buffer.
+    /// </summary>
+    public event System.Action MapTogglePressed;
+
     private void Awake()
     {
         _controls = new PlayerControls();
@@ -34,6 +42,7 @@ public sealed class PlayerInputReader : MonoBehaviour, IMovementInput, ILookInpu
         _controls.Player.stance_next.performed += OnStanceNextPerformed;
         _controls.Player.stance_prev.performed += OnStancePrevPerformed;
         _controls.Player.interact.performed += OnInteractPerformed;
+        _controls.Player.map.performed += OnMapPerformed;
     }
 
     private void OnEnable()
@@ -58,6 +67,7 @@ public sealed class PlayerInputReader : MonoBehaviour, IMovementInput, ILookInpu
         _controls.Player.stance_next.performed -= OnStanceNextPerformed;
         _controls.Player.stance_prev.performed -= OnStancePrevPerformed;
         _controls.Player.interact.performed -= OnInteractPerformed;
+        _controls.Player.map.performed -= OnMapPerformed;
 
         _controls.Dispose();
         _controls = null;
@@ -110,5 +120,12 @@ public sealed class PlayerInputReader : MonoBehaviour, IMovementInput, ILookInpu
         if (GameState.IsPlayerInputLocked())
             return;
         StancePrevPressed?.Invoke();
+    }
+
+    private void OnMapPerformed(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    {
+        if (GameState.IsPlayerInputLocked())
+            return;
+        MapTogglePressed?.Invoke();
     }
 }

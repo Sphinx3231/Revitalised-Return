@@ -33,6 +33,7 @@ public sealed class PlayerRoot : MonoBehaviour
     [SerializeField] private ParryController parryController;
     [SerializeField] private KnockbackAbility knockbackAbility;
     [SerializeField] private InteractionResolver interactionResolver;
+    [SerializeField] private MapScreen mapScreen;
 
     /// <summary>
     /// Internal reads of raw movement/look input go through these interfaces (Dependency
@@ -54,6 +55,7 @@ public sealed class PlayerRoot : MonoBehaviour
         {
             inputReader.StanceNextPressed += HandleStanceNext;
             inputReader.StancePrevPressed += HandleStancePrev;
+            inputReader.MapTogglePressed += HandleMapToggle;
         }
     }
 
@@ -63,6 +65,7 @@ public sealed class PlayerRoot : MonoBehaviour
         {
             inputReader.StanceNextPressed -= HandleStanceNext;
             inputReader.StancePrevPressed -= HandleStancePrev;
+            inputReader.MapTogglePressed -= HandleMapToggle;
         }
     }
 
@@ -74,6 +77,11 @@ public sealed class PlayerRoot : MonoBehaviour
     private void HandleStancePrev()
     {
         stanceController?.CyclePrevious();
+    }
+
+    private void HandleMapToggle()
+    {
+        mapScreen?.Toggle();
     }
 
     private void Update()
