@@ -1002,8 +1002,23 @@ process-gap lesson. **Standing gap, not new:** the mandatory human Play Mode pas
 outstanding, same as Steps 6-9 and the FPS pivot — no agent in this session has Play Mode/Game
 View control.
 
-**Next action:** a human Play Mode pass covering the new first-person camera/weapon feel, the
-Steps 6/7/8/9 backlog, and now Step 10's interaction loop (approach the shrine/chest/harvest
-node in `Prologue.unity`, confirm candidate ranking picks the right target and interacting
-grants the item / shows the notice). Then Director opens the Step 11 task brief (Reactive HUD,
-UI Systems & Persistence Engine) in strict 14-step order.
+**2026-08-02: the standing human Play Mode gap is closed.** The user manually tested
+everything queued above — FPS camera/weapon feel, the Steps 6/7/8/9 backlog (hit-stop, camera
+shake, hit-flash, spark VFX; AI perception/FSM; full boss encounter including phase
+transition and arena lock/unseal; Prologue's visual/pacing read), and Step 10's interaction
+loop (shrine/chest/harvest node) — **all confirmed clean, no bugs found.** This closes out
+the multi-step backlog that had been carried forward since Step 6. See `docs/Worklog.md`'s
+per-step rows for the individual confirmations.
+
+**2026-08-02: Step 11 (Reactive HUD, UI Systems & Persistence Engine) task brief opened,**
+scoped to what UI Systems Phase 2 didn't already cover (vitals HUD/stance diamond/notices are
+done, see that entry above) — the compass strip, full map screen, and the entire save/load
+persistence engine (`PlayerData`, JSON serialization, checkpoint autosave, 3 playthrough
+slots), none of which exist yet anywhere in the project. Research Agent dispatched to resolve
+locked-but-unverified constraints before implementation starts, most importantly whether
+Unity's `JsonUtility` can actually round-trip `PlayerData`'s locked `Dictionary`-bearing
+fields (a real, documented API limitation, not a style question) or whether `System.Text.Json`
+is required instead. See `docs/Tasks/2026-08-02-step-11-hud-persistence.md`.
+
+**Next action:** await Research findings, then Director approach sign-off, then Implementation
+→ QA → fix loop per the standard pipeline, for Step 11.
