@@ -58,11 +58,23 @@ public class DialogueRunner : MonoBehaviour
         // what GameState.Dialogue blocks.
         if ((CurrentNode.choices == null || CurrentNode.choices.Count == 0))
         {
-            if (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Mouse0) || Input.GetKeyDown(KeyCode.Return))
+            if (ShouldAdvance())
             {
                 End();
             }
         }
+    }
+
+    /// <summary>
+    /// Polls the real advance-on-no-choices input (E / left mouse / Return). Factored out of
+    /// Update() as `protected virtual` purely so EditMode tests can exercise Update()'s branching
+    /// (IsActive guard, choices-present guard, the End() call itself) without depending on
+    /// UnityEngine.Input's real keyboard/mouse state, which EditMode tests cannot drive -- a test
+    /// subclass overrides this one seam instead of the whole Update() method.
+    /// </summary>
+    protected virtual bool ShouldAdvance()
+    {
+        return Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Mouse0) || Input.GetKeyDown(KeyCode.Return);
     }
 
     /// <summary>

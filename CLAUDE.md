@@ -1056,8 +1056,40 @@ the FPS pivot was confirmed clean this session (see above), but Step 11's own ne
 (compass strip, map screen, shrine-save-on-rest, save-slot menu) is new since that pass and
 still needs its own confirmation.
 
-**Next action:** a human Play Mode pass on Step 11's new content specifically (open the map
-with `M`, check the compass tracks yaw correctly, rest at the shrine and confirm a save file
-is written / discoveredShrines persists, back out to MainMenu and confirm the slot shows real
-metadata), then Director opens the Step 12 task brief (Narrative Engine, Dialogue Trees & Quest
-State Machine) in strict 14-step order.
+**2026-08-03: Step 12 (Narrative Engine, Dialogue Trees & Quest State Machine) is done** —
+`DialogueTree`/`DialogueNode`/`DialogueCondition`/`DialogueConditionEvaluator`,
+`QuestState`/`Quest`/`QuestSystem`, `DialogueRunner`, `DialogueDisplay`, `NpcInteractable`.
+Real Unity 6000.5.5f1 constraint confirmed and recorded so it isn't re-litigated: the
+Inspector cannot serialize `Dictionary` fields at this editor version (that landed in
+6000.6) — `DialogueTree.nodes` is a `List<DialogueNode>` + a runtime `Rebuild()`-built index,
+the third use of a pattern this codebase already proved twice (`Inventory`, `ItemDatabase`).
+Fixed a real Step-11-originated defect along the way: `PlayerData.dialogueSeen` was a
+`List<string>`, inconsistent with Step 11's own stated `HashSet` reasoning for
+`discoveredShrines` — fixed, zero save-format break. `Shrine.Interact` gained one line
+(`QuestSystem.TickOnRest(data)`, ordered *before* `SaveSystem.Save()` — tick-then-save,
+tested explicitly, since the reverse order would persist stale state on every rest).
+
+**Notable process event: this task's implementation was built with zero Unity-MCP/Editor
+access the entire time**, including hand-editing `Prologue.unity`'s raw scene YAML to add an
+NPC, `DialogueRunner`, a Canvas/Panel hierarchy, and an `EventSystem` — never compiled or
+tested during implementation itself. QA correctly treated this as elevated risk rather than
+routine trust: confirmed the project still compiled before anything else, independently
+traced the softlock risk (dialogue's `GameState.Dialogue` state blocks `PlayerRoot`'s own
+input handling, so advance/choice input must bypass `InputBuffer` entirely or the player gets
+stuck — the single highest-risk item Research flagged) by hand rather than accepting the
+implementer's claim, and cross-checked every hand-authored GUID against real `.meta` files
+before accepting the scene wasn't corrupted. It wasn't. QA then caught `DialogueRunner.cs` at
+70.2% coverage (below the 80% gate); a fix loop extracted a small testable seam
+(`ShouldAdvance()`) out of `Update()`'s real-`Input`-polling and added 14 tests, and — after
+the user closed their Editor a second time specifically so QA could measure the real number
+rather than accept a branch-coverage estimate — confirmed 90.5%. **587/587 tests, 96.6%
+aggregate coverage.** See `docs/Tasks/2026-08-02-step-12-narrative-quests.md` for the full
+multi-attempt record. One `DialogueTree`/`Quest`/`NpcInteractable` exist as mechanism proof
+only (not the charter's full 6-act/12-NPC-thread content pass, not Soren's real branching).
+
+**Next action:** a human Play Mode pass covering both Step 11's still-unconfirmed content
+(map/`M` toggle, compass yaw tracking, shrine save-write, MainMenu slot metadata) and Step
+12's new content (talk to the Prologue NPC, confirm dialogue displays and advances without
+softlocking, confirm the branching choice mutates quest state, confirm shrine rest ticks it
+to `ObjectiveComplete`), then Director opens the Step 13 task brief (Production Art, Animation
+Blend Trees, Shaders & Audio Pass) in strict 14-step order.
