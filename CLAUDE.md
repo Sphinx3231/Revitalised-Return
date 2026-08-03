@@ -1087,9 +1087,26 @@ aggregate coverage.** See `docs/Tasks/2026-08-02-step-12-narrative-quests.md` fo
 multi-attempt record. One `DialogueTree`/`Quest`/`NpcInteractable` exist as mechanism proof
 only (not the charter's full 6-act/12-NPC-thread content pass, not Soren's real branching).
 
-**Next action:** a human Play Mode pass covering both Step 11's still-unconfirmed content
-(map/`M` toggle, compass yaw tracking, shrine save-write, MainMenu slot metadata) and Step
-12's new content (talk to the Prologue NPC, confirm dialogue displays and advances without
-softlocking, confirm the branching choice mutates quest state, confirm shrine rest ticks it
-to `ObjectiveComplete`), then Director opens the Step 13 task brief (Production Art, Animation
-Blend Trees, Shaders & Audio Pass) in strict 14-step order.
+**2026-08-03: OPEN BUG — no input works in `Prologue.unity`, fix attempt did not resolve it.**
+User reported no keys worked in Play Mode on `Prologue.unity`. Investigation found the scene
+was never registered in `EditorBuildSettings` and has no MainMenu→gameplay scene transition,
+so nothing ever called `GameState.SetState(Playing)` on direct entry — the same bug class as
+the earlier `SandboxAutoPlay`/`MainMenuAutoState` fixes. Added `PrologueAutoPlay.cs` mirroring
+that exact pattern (commit `c12c579`, 590/590 tests passing). **User re-tested and confirmed
+input still does not work.** The GameState diagnosis was evidently incomplete or wrong about
+being the sole cause — root cause of the continued failure is **unknown and not yet
+re-investigated**. Do not assume the GameState fix addressed it; start the next investigation
+from scratch rather than building on that diagnosis. Known, separate, unrelated gap from the
+same original investigation pass: `Prologue.unity` has no Cinemachine FPS camera rig (plain
+default `Camera` only) — this could itself be a contributing factor worth checking (e.g. no
+`CinemachineBrain` might interact badly with something), not confirmed either way.
+
+**Next action:** re-investigate the Prologue.unity input failure from first principles —
+check the actual live `GameState.CurrentState` during a real Play session (not just static
+scene analysis), check `PlayerInputReader`/Input System action-map bindings are actually
+active and not being intercepted/consumed elsewhere (e.g. by `DialogueRunner`'s `Update()`
+polling, the new `EventSystem`/`InputSystemUIInputModule`, or `MapScreen`'s `M`-toggle input),
+and check the Cinemachine/camera gap isn't itself blocking something. Separately, Steps 11/12's
+own new-content Play Mode confirmations (map toggle, compass, shrine save, NPC dialogue) are
+still outstanding too. Step 13 (Production Art, Animation Blend Trees, Shaders & Audio Pass)
+should not open until this is resolved.
